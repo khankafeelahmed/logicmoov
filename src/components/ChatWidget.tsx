@@ -22,7 +22,7 @@ import {
 import { getSocket } from "@/lib/realtime";
 import { localAssistantReply } from "@/lib/assistant";
 
-const STORAGE_KEY = "txigold_chat";
+const STORAGE_KEY = "logicmoov_chat";
 
 export default function ChatWidget({
   locale,

@@ -4,7 +4,7 @@ export type Dictionary = typeof fr;
 
 const fr = {
   brand: {
-    name: "TxIGOLD",
+    name: "LogicMoov",
     tagline: "Transport de taxi moderne au Québec",
   },
   nav: {
@@ -140,7 +140,7 @@ const fr = {
     ],
   },
   features: {
-    title: "Pourquoi choisir TxIGOLD",
+    title: "Pourquoi choisir LogicMoov",
     subtitle:
       "Une plateforme moderne conçue pour la fiabilité et la tranquillité d'esprit.",
     items: [
@@ -278,10 +278,10 @@ const fr = {
       "Ceci est une démonstration. Aucun paiement réel n'est traité et aucun chauffeur n'est réellement envoyé.",
   },
   about: {
-    title: "À propos de TxIGOLD",
+    title: "À propos de LogicMoov",
     lead: "Nous modernisons le transport de taxi au Québec avec une technologie fiable et un service humain.",
     body: [
-      "TxIGOLD est né d'une idée simple : rendre le transport en taxi transparent, ponctuel et accessible partout dans la province. Fini les tarifs imprévisibles et l'attente incertaine.",
+      "LogicMoov est né d'une idée simple : rendre le transport en taxi transparent, ponctuel et accessible partout dans la province. Fini les tarifs imprévisibles et l'attente incertaine.",
       "Notre plateforme relie les voyageurs à un réseau de chauffeurs professionnels vérifiés, avec des prix fixes annoncés à l'avance et un suivi en temps réel de chaque course.",
       "Des transferts aéroport aux déplacements d'affaires, notre mission est de vous amener à destination en toute confiance, en français comme en anglais.",
     ],
@@ -299,7 +299,7 @@ const fr = {
     phoneTitle: "Téléphone",
     phone: "+1 (514) 555-0123",
     emailTitle: "Courriel",
-    email: "info@txigold.ca",
+    email: "info@logicmoov.ca",
     hoursTitle: "Heures",
     hours: "24 heures / 7 jours",
     addressTitle: "Bureau",
@@ -323,7 +323,7 @@ const fr = {
   },
   chat: {
     launcher: "Aide",
-    title: "Assistance TxIGOLD",
+    title: "Assistance LogicMoov",
     subtitleBot: "Assistant virtuel · réponses instantanées",
     subtitleWaiting: "Mise en relation avec un agent…",
     subtitleAgent: "Vous discutez avec un agent",
@@ -342,7 +342,7 @@ const fr = {
     newChat: "Nouvelle conversation",
     offline: "Service de clavardage indisponible.",
     agentsOffline:
-      "Nos agents ne sont pas joignables via le clavardage pour le moment. Appelez-nous au +1 (514) 555-0123 ou écrivez à info@txigold.ca et nous vous répondrons rapidement.",
+      "Nos agents ne sont pas joignables via le clavardage pour le moment. Appelez-nous au +1 (514) 555-0123 ou écrivez à info@logicmoov.ca et nous vous répondrons rapidement.",
   },
   common: {
     loading: "Chargement…",
@@ -351,7 +351,7 @@ const fr = {
 
 const en: Dictionary = {
   brand: {
-    name: "TxIGOLD",
+    name: "LogicMoov",
     tagline: "Modern taxi transportation in Quebec",
   },
   nav: {
@@ -487,7 +487,7 @@ const en: Dictionary = {
     ],
   },
   features: {
-    title: "Why choose TxIGOLD",
+    title: "Why choose LogicMoov",
     subtitle:
       "A modern platform built for reliability and peace of mind.",
     items: [
@@ -625,10 +625,10 @@ const en: Dictionary = {
       "This is a demo. No real payment is processed and no driver is actually dispatched.",
   },
   about: {
-    title: "About TxIGOLD",
+    title: "About LogicMoov",
     lead: "We're modernizing taxi transportation in Quebec with reliable technology and human service.",
     body: [
-      "TxIGOLD was born from a simple idea: make taxi travel transparent, punctual and accessible everywhere in the province. No more unpredictable fares or uncertain waiting.",
+      "LogicMoov was born from a simple idea: make taxi travel transparent, punctual and accessible everywhere in the province. No more unpredictable fares or uncertain waiting.",
       "Our platform connects travellers to a network of verified professional drivers, with fixed prices announced up front and real-time tracking of every ride.",
       "From airport transfers to business travel, our mission is to get you to your destination with confidence — in French and in English.",
     ],
@@ -646,7 +646,7 @@ const en: Dictionary = {
     phoneTitle: "Phone",
     phone: "+1 (514) 555-0123",
     emailTitle: "Email",
-    email: "info@txigold.ca",
+    email: "info@logicmoov.ca",
     hoursTitle: "Hours",
     hours: "24 hours / 7 days",
     addressTitle: "Office",
@@ -670,7 +670,7 @@ const en: Dictionary = {
   },
   chat: {
     launcher: "Help",
-    title: "TxIGOLD Support",
+    title: "LogicMoov Support",
     subtitleBot: "Virtual assistant · instant answers",
     subtitleWaiting: "Connecting you to an agent…",
     subtitleAgent: "You're chatting with an agent",
@@ -689,7 +689,7 @@ const en: Dictionary = {
     newChat: "New chat",
     offline: "Chat service unavailable.",
     agentsOffline:
-      "Our agents aren't reachable via chat right now. Call us at +1 (514) 555-0123 or email info@txigold.ca and we'll get back to you quickly.",
+      "Our agents aren't reachable via chat right now. Call us at +1 (514) 555-0123 or email info@logicmoov.ca and we'll get back to you quickly.",
   },
   common: {
     loading: "Loading…",

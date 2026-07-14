@@ -72,7 +72,7 @@ export default function AdminShell({
             <Car className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-extrabold text-ink-900">TxIGOLD</p>
+            <p className="text-sm font-extrabold text-ink-900">LogicMoov</p>
             <p className="text-xs text-ink-400">Admin</p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function AdminShell({
 
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-ink-200 bg-white px-4 py-3 lg:hidden">
-          <span className="font-extrabold text-ink-900">TxIGOLD Admin</span>
+          <span className="font-extrabold text-ink-900">LogicMoov Admin</span>
           <button type="button" onClick={logout} className="text-sm text-ink-500">
             Sign out
           </button>

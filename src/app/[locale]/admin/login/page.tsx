@@ -13,7 +13,7 @@ export default function AdminLoginPage({
 }) {
   const { locale } = use(params);
   const router = useRouter();
-  const [email, setEmail] = useState("admin@txigold.ca");
+  const [email, setEmail] = useState("admin@logicmoov.ca");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,7 @@ export default function AdminLoginPage({
             <Car className="h-5 w-5" />
           </span>
           <div>
-            <p className="font-extrabold text-ink-900">TxIGOLD</p>
+            <p className="font-extrabold text-ink-900">LogicMoov</p>
             <p className="text-xs text-ink-400">Admin sign in</p>
           </div>
         </div>
@@ -91,7 +91,7 @@ export default function AdminLoginPage({
         </form>
 
         <p className="mt-4 text-center text-xs text-ink-400">
-          Seeded admin: admin@txigold.ca / Admin1234!
+          Seeded admin: admin@logicmoov.ca / Admin1234!
         </p>
       </div>
     </div>

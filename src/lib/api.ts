@@ -1,5 +1,5 @@
 /**
- * Thin client for the TxIGOLD backend API.
+ * Thin client for the LogicMoov backend API.
  * Base URL is configurable via NEXT_PUBLIC_API_URL.
  */
 export const API_BASE_URL =
