@@ -23,7 +23,7 @@ export default function Footer({
                 <Car className="h-5 w-5" />
               </span>
               <span className="text-lg font-extrabold tracking-tight text-white">
-                TxI<span className="text-brand-400">GOLD</span>
+                Logic<span className="text-brand-400">Moov</span>
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-400">

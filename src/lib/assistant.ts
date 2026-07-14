@@ -42,7 +42,7 @@ function detectIntent(text: string): Intent {
 const RESPONSES: Record<Locale, Record<Intent, string>> = {
   en: {
     greeting:
-      "Hi! I'm the TAXIMOVQC assistant. I can help with pricing, booking a ride, airport transfers and coverage. How can I help?",
+      "Hi! I'm the LogicMoov assistant. I can help with pricing, booking a ride, airport transfers and coverage. How can I help?",
     pricing:
       "Our prices are fixed and shown before you confirm — no surge pricing. Get an instant estimate on our booking page by entering your pickup and destination.",
     booking:
@@ -59,11 +59,11 @@ const RESPONSES: Record<Locale, Record<Intent, string>> = {
     track:
       "To track your ride or check a driver's status, please have your booking reference (QR-…) ready, or call us at +1 (514) 555-0123.",
     fallback:
-      "I want to make sure you get the right answer. You can reach our team any time at +1 (514) 555-0123 or info@taximovqc.ca. Meanwhile, ask me about pricing, booking, airport transfers, coverage, hours or payment.",
+      "I want to make sure you get the right answer. You can reach our team any time at +1 (514) 555-0123 or info@logicmoov.ca. Meanwhile, ask me about pricing, booking, airport transfers, coverage, hours or payment.",
   },
   fr: {
     greeting:
-      "Bonjour ! Je suis l'assistant TAXIMOVQC. Je peux vous aider avec les prix, la réservation, les transferts aéroport et la couverture. Comment puis-je vous aider ?",
+      "Bonjour ! Je suis l'assistant LogicMoov. Je peux vous aider avec les prix, la réservation, les transferts aéroport et la couverture. Comment puis-je vous aider ?",
     pricing:
       "Nos prix sont fixes et affichés avant la confirmation — sans tarification dynamique. Obtenez une estimation instantanée sur la page de réservation en indiquant le départ et la destination.",
     booking:
@@ -80,7 +80,7 @@ const RESPONSES: Record<Locale, Record<Intent, string>> = {
     track:
       "Pour suivre votre course ou vérifier le statut d'un chauffeur, ayez votre numéro de référence (QR-…), ou appelez-nous au +1 (514) 555-0123.",
     fallback:
-      "Je veux m'assurer de bien vous répondre. Vous pouvez joindre notre équipe à tout moment au +1 (514) 555-0123 ou info@taximovqc.ca. Entre-temps, posez-moi une question sur les prix, la réservation, les transferts aéroport, la couverture, les heures ou le paiement.",
+      "Je veux m'assurer de bien vous répondre. Vous pouvez joindre notre équipe à tout moment au +1 (514) 555-0123 ou info@logicmoov.ca. Entre-temps, posez-moi une question sur les prix, la réservation, les transferts aéroport, la couverture, les heures ou le paiement.",
   },
 };
 

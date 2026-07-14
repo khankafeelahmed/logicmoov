@@ -1,4 +1,4 @@
-# TAXIMOVQC — Modern Taxi Platform (Web)
+# LogicMoov — Modern Taxi Platform (Web)
 
 A modern, bilingual (Français / English) taxi transportation platform website for Quebec, Canada. This is the customer-facing web app: marketing site + online booking flow.
 
@@ -78,7 +78,7 @@ web/src/
 Visit `/[locale]/admin` (e.g. http://localhost:3000/en/admin). You'll be redirected
 to the login page. Use the seeded admin credentials from the backend:
 
-- **Email:** `admin@taximovqc.ca`
+- **Email:** `admin@logicmoov.ca`
 - **Password:** `Admin1234!`
 
 Requires the backend API + a seeded database.

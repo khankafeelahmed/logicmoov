@@ -34,7 +34,7 @@ export default function Header({
             <Car className="h-5 w-5" />
           </span>
           <span className="text-lg font-extrabold tracking-tight text-ink-900">
-            TxI<span className="text-brand-600">GOLD</span>
+            Logic<span className="text-brand-600">Moov</span>
           </span>
         </Link>
 
