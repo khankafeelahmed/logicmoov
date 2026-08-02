@@ -256,7 +256,7 @@ const fr = {
     notes: "Notes (optionnel)",
     notesPlaceholder: "Numéro de vol, instructions spéciales…",
     back: "Retour",
-    next: "Continuer",
+    next: "Continuer le paiement",
     confirm: "Confirmer la réservation",
     summary: "Résumé de la réservation",
     successTitle: "Réservation confirmée !",
@@ -292,12 +292,46 @@ const fr = {
       { title: "Sécurité", description: "Des chauffeurs vérifiés et des trajets traçables." },
       { title: "Proximité", description: "Un service bilingue ancré dans les communautés du Québec." },
     ],
+    registeredTitle: "Entreprise enregistrée",
+    registeredText:
+      "LogicMoov est une entreprise enregistrée provincialement au Québec, Canada — NEQ 2282359860.",
+    detailsTitle: "LogicMoov en bref",
+    details: [
+      { label: "Numéro d'entreprise du Québec (NEQ)", value: "2282359860" },
+      { label: "En activité depuis", value: "2026" },
+      { label: "Taille de la flotte", value: "Plus de 30 véhicules" },
+      { label: "Régions desservies", value: "Montréal et les environs" },
+      {
+        label: "Aéroport desservi",
+        value: "Aéroport international Montréal-Trudeau (YUL)",
+      },
+    ],
+    vehicleTypesTitle: "Accessibilité et types de véhicules",
+    vehicleTypesSubtitle:
+      "Une flotte variée pour répondre à tous les besoins de déplacement.",
+    vehicleTypes: [
+      {
+        name: "Berlines",
+        description:
+          "Voitures standard à 4 portes pouvant accueillir jusqu'à 4 passagers pour les trajets réguliers.",
+      },
+      {
+        name: "Fourgonnettes",
+        description:
+          "Véhicules multiplaces plus spacieux, conçus pour les familles ou petits groupes avec bagages supplémentaires.",
+      },
+      {
+        name: "Taxis adaptés",
+        description:
+          "Véhicules spécialement équipés de rampes ou de plateformes élévatrices pour les voyageurs à mobilité réduite ou en fauteuil roulant.",
+      },
+    ],
   },
   contact: {
     title: "Contactez-nous",
     subtitle: "Une question ou une réservation spéciale ? Nous sommes là pour vous.",
     phoneTitle: "Téléphone",
-    phone: "+1 (514) 555-0123",
+    phone: "+514-266-4708",
     emailTitle: "Courriel",
     email: "info@logicmoov.ca",
     hoursTitle: "Heures",
@@ -310,6 +344,43 @@ const fr = {
     formSubmit: "Envoyer le message",
     formSuccess: "Merci ! Votre message a été envoyé.",
   },
+  cancellationPolicy: {
+    title: "Politique d'annulation",
+    lead:
+      "Nous comprenons que les plans peuvent changer. Voici comment fonctionnent les annulations et modifications pour les réservations LogicMoov.",
+    items: [
+      {
+        title: "Annulation gratuite",
+        description:
+          "Vous pouvez annuler gratuitement jusqu'à 2 heures avant l'heure de prise en charge prévue.",
+      },
+      {
+        title: "Annulation tardive",
+        description:
+          "Toute annulation effectuée moins de 2 heures avant la prise en charge peut entraîner des frais correspondant à une partie du tarif estimé.",
+      },
+      {
+        title: "Non-présentation",
+        description:
+          "Si le chauffeur se présente à l'heure et au lieu convenus et que le passager reste introuvable après 15 minutes d'attente (30 minutes pour les transferts aéroport), la course est considérée comme non honorée et les frais applicables sont facturés.",
+      },
+      {
+        title: "Modifications de réservation",
+        description:
+          "Vous pouvez modifier l'heure, le lieu ou le véhicule de votre réservation gratuitement, sous réserve de disponibilité, en nous contactant avant l'heure prévue.",
+      },
+      {
+        title: "Annulation par LogicMoov",
+        description:
+          "Dans le cas rare où une course devrait être annulée de notre côté, vous serez averti dans les plus brefs délais et intégralement remboursé si un paiement a déjà été effectué.",
+      },
+      {
+        title: "Comment annuler",
+        description:
+          "Pour annuler ou modifier une réservation, contactez-nous au +514-266-4708 ou à info@logicmoov.ca.",
+      },
+    ],
+  },
   footer: {
     tagline: "Transport de taxi moderne, fiable et bilingue partout au Québec.",
     company: "Entreprise",
@@ -318,7 +389,8 @@ const fr = {
     privacy: "Confidentialité",
     terms: "Conditions d'utilisation",
     accessibility: "Accessibilité",
-    rights: "Tous droits réservés.",
+    cancellationPolicy: "Politique d'annulation",
+    rights: "Tous droits réservés. NEQ 2282359860.",
     langLabel: "Langue",
   },
   chat: {
@@ -603,7 +675,7 @@ const en: Dictionary = {
     notes: "Notes (optional)",
     notesPlaceholder: "Flight number, special instructions…",
     back: "Back",
-    next: "Continue",
+    next: "Continue payment",
     confirm: "Confirm booking",
     summary: "Booking summary",
     successTitle: "Booking confirmed!",
@@ -639,12 +711,45 @@ const en: Dictionary = {
       { title: "Safety", description: "Verified drivers and traceable trips." },
       { title: "Community", description: "Bilingual service rooted in Quebec communities." },
     ],
+    registeredTitle: "Registered business",
+    registeredText:
+      "LogicMoov is a provincially registered business in Québec, Canada — NEQ 2282359860.",
+    detailsTitle: "LogicMoov at a glance",
+    details: [
+      { label: "Québec business number (NEQ)", value: "2282359860" },
+      { label: "In business since", value: "2026" },
+      { label: "Fleet size", value: "30+ vehicles" },
+      { label: "Regions served", value: "Montreal and surrounding area" },
+      {
+        label: "Airport served",
+        value: "Montréal Trudeau International Airport",
+      },
+    ],
+    vehicleTypesTitle: "Accessibility & Vehicle Types",
+    vehicleTypesSubtitle: "A varied fleet to match every travel need.",
+    vehicleTypes: [
+      {
+        name: "Sedans",
+        description:
+          "Standard 4-door cars that fit up to 4 passengers for regular trips.",
+      },
+      {
+        name: "Minivans",
+        description:
+          "Larger multi-passenger vehicles designed for families or small groups with extra luggage.",
+      },
+      {
+        name: "Adapted Taxis",
+        description:
+          "Specially equipped vehicles with ramps or lifts for travelers with limited mobility or wheelchair users.",
+      },
+    ],
   },
   contact: {
     title: "Contact us",
     subtitle: "A question or a special booking? We're here for you.",
     phoneTitle: "Phone",
-    phone: "+1 (514) 555-0123",
+    phone: "+514-266-4708",
     emailTitle: "Email",
     email: "info@logicmoov.ca",
     hoursTitle: "Hours",
@@ -657,6 +762,43 @@ const en: Dictionary = {
     formSubmit: "Send message",
     formSuccess: "Thank you! Your message has been sent.",
   },
+  cancellationPolicy: {
+    title: "Cancellation Policy",
+    lead:
+      "We understand plans can change. Here's how cancellations and changes work for LogicMoov bookings.",
+    items: [
+      {
+        title: "Free cancellation",
+        description:
+          "You can cancel free of charge up to 2 hours before the scheduled pickup time.",
+      },
+      {
+        title: "Late cancellation",
+        description:
+          "Cancellations made less than 2 hours before pickup may incur a fee based on a portion of the estimated fare.",
+      },
+      {
+        title: "No-shows",
+        description:
+          "If the driver arrives at the agreed time and location and the passenger cannot be reached after 15 minutes of waiting (30 minutes for airport transfers), the ride is considered a no-show and applicable fees will be charged.",
+      },
+      {
+        title: "Booking changes",
+        description:
+          "You can change the time, location or vehicle for your booking free of charge, subject to availability, by contacting us before the scheduled time.",
+      },
+      {
+        title: "Cancellation by LogicMoov",
+        description:
+          "In the rare case a ride needs to be cancelled on our end, you'll be notified as soon as possible and fully refunded if a payment has already been made.",
+      },
+      {
+        title: "How to cancel",
+        description:
+          "To cancel or change a booking, contact us at +514-266-4708 or info@logicmoov.ca.",
+      },
+    ],
+  },
   footer: {
     tagline: "Modern, reliable, bilingual taxi transportation across Quebec.",
     company: "Company",
@@ -665,7 +807,8 @@ const en: Dictionary = {
     privacy: "Privacy",
     terms: "Terms of use",
     accessibility: "Accessibility",
-    rights: "All rights reserved.",
+    cancellationPolicy: "Cancellation policy",
+    rights: "All rights reserved. NEQ 2282359860.",
     langLabel: "Language",
   },
   chat: {

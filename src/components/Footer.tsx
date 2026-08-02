@@ -98,10 +98,16 @@ export default function Footer({
           <p>
             © {year} {dict.brand.name}. {dict.footer.rights}
           </p>
-          <div className="flex gap-5">
+          <div className="flex flex-wrap justify-center gap-5">
             <span className="hover:text-ink-300">{dict.footer.privacy}</span>
             <span className="hover:text-ink-300">{dict.footer.terms}</span>
             <span className="hover:text-ink-300">{dict.footer.accessibility}</span>
+            <Link
+              href={`${base}/cancellation-policy`}
+              className="hover:text-ink-300"
+            >
+              {dict.footer.cancellationPolicy}
+            </Link>
           </div>
         </div>
       </div>
