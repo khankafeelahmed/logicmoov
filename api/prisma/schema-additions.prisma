@@ -1,0 +1,70 @@
+// ============================================================================
+// SCHEMA ADDITIONS — merge these into your existing api/prisma/schema.prisma
+// Written fresh for this task; verify against whatever is already in your
+// local schema.prisma before applying (see chat note on the unexplained
+// pre-existing content).
+// ============================================================================
+
+// ---------- New enums (add alongside your existing enums) ----------
+
+enum CancelledBy {
+  CUSTOMER
+  LOGICMOOV
+  SUPPLIER
+  NO_SHOW
+}
+
+enum BookingSource {
+  DIRECT
+  BOOKING_COM
+  HOLIDAY_TAXIS
+  VIATOR
+  GET_YOUR_GUIDE
+  EXPEDIA
+}
+
+// ---------- Additions to the existing Vehicle model ----------
+// Add these two fields inside `model Vehicle { ... }`:
+//
+//   maxLuggage Int     @default(2)
+//   accessible Boolean @default(false)
+//
+// Rationale: supplier feeds need luggage capacity and accessibility as
+// distinct, queryable fields — not implied by vehicle category.
+
+// ---------- Additions to the existing Booking model ----------
+// Add these fields inside `model Booking { ... }`:
+//
+//   source          BookingSource @default(DIRECT)
+//   externalRef     String?       // the OTA's own booking reference
+//   flightNumber    String?       // structured, not buried in `notes`
+//   cancelledBy     CancelledBy?
+//   cancelledReason String?
+//
+// Also add this index alongside the existing @@index lines:
+//
+//   @@index([source])
+//
+// Note: `externalRef` is intentionally NOT globally unique across all
+// sources — different OTAs could theoretically reuse reference formats.
+// If you want a stronger guarantee, make it a compound unique constraint
+// instead: @@unique([source, externalRef])
+
+// ---------- New model: RouteRate ----------
+
+model RouteRate {
+  id                   String          @id @default(cuid())
+  originZone           String
+  destinationZone      String
+  category             VehicleCategory
+  priceCents           Int
+  currency             String          @default("CAD")
+  meetAndGreetFeeCents Int?
+  includedWaitMin      Int             @default(60)
+  active               Boolean         @default(true)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  @@unique([originZone, destinationZone, category])
+  @@index([originZone, destinationZone])
+}
