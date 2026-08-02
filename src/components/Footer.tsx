@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Car, Mail, MapPin, Phone } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -96,7 +96,7 @@ export default function Footer({
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-ink-800 pt-6 text-xs text-ink-500 sm:flex-row">
           <p>
-            © {year} {dict.brand.name}. {dict.footer.rights}
+            ┬⌐ {year} {dict.brand.name}. {dict.footer.rights}
           </p>
           <div className="flex flex-wrap justify-center gap-5">
             <span className="hover:text-ink-300">{dict.footer.privacy}</span>

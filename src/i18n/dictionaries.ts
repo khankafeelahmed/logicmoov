@@ -1,121 +1,121 @@
-import type { Locale } from "./config";
+﻿import type { Locale } from "./config";
 
 export type Dictionary = typeof fr;
 
 const fr = {
   brand: {
     name: "LogicMoov",
-    tagline: "Transport de taxi moderne au Québec",
+    tagline: "Transport de taxi moderne au Qu├⌐bec",
   },
   nav: {
     home: "Accueil",
-    howItWorks: "Comment ça marche",
+    howItWorks: "Comment ├ºa marche",
     fleet: "Notre flotte",
     services: "Services",
     coverage: "Couverture",
-    about: "À propos",
+    about: "├Ç propos",
     contact: "Contact",
-    book: "Réserver",
+    book: "R├⌐server",
     callUs: "Appelez-nous",
     menu: "Menu",
   },
   hero: {
-    badge: "Disponible 24/7 partout au Québec",
-    title: "Votre course, simplifiée",
-    titleAccent: "partout au Québec",
+    badge: "Disponible 24/7 partout au Qu├⌐bec",
+    title: "Votre course, simplifi├⌐e",
+    titleAccent: "partout au Qu├⌐bec",
     subtitle:
-      "Réservez un taxi fiable en quelques secondes. Prix fixes, chauffeurs professionnels et suivi en temps réel — de Montréal à Québec et au-delà.",
-    ctaPrimary: "Réserver une course",
-    ctaSecondary: "Voir comment ça marche",
-    trust: "La confiance de milliers de voyageurs québécois",
+      "R├⌐servez un taxi fiable en quelques secondes. Prix fixes, chauffeurs professionnels et suivi en temps r├⌐el ΓÇö de Montr├⌐al ├á Qu├⌐bec et au-del├á.",
+    ctaPrimary: "R├⌐server une course",
+    ctaSecondary: "Voir comment ├ºa marche",
+    trust: "La confiance de milliers de voyageurs qu├⌐b├⌐cois",
   },
   stats: {
-    rides: "Courses complétées",
+    rides: "Courses compl├⌐t├⌐es",
     drivers: "Chauffeurs partenaires",
     cities: "Villes desservies",
     rating: "Note moyenne",
   },
   quickBook: {
     title: "Estimez votre course",
-    pickup: "Point de départ",
-    pickupPlaceholder: "Adresse de départ",
+    pickup: "Point de d├⌐part",
+    pickupPlaceholder: "Adresse de d├⌐part",
     dropoff: "Destination",
-    dropoffPlaceholder: "Adresse d'arrivée",
+    dropoffPlaceholder: "Adresse d'arriv├⌐e",
     when: "Quand",
     now: "Maintenant",
     schedule: "Planifier",
     submit: "Obtenir une estimation",
-    estimate: "Prix estimé",
-    note: "Estimation indicative. Le prix final est confirmé avant le départ.",
+    estimate: "Prix estim├⌐",
+    note: "Estimation indicative. Le prix final est confirm├⌐ avant le d├⌐part.",
   },
   services: {
     title: "Des services pour chaque trajet",
     subtitle:
-      "Que ce soit pour l'aéroport, le travail ou une sortie, nous avons une solution adaptée.",
+      "Que ce soit pour l'a├⌐roport, le travail ou une sortie, nous avons une solution adapt├⌐e.",
     items: [
       {
-        title: "Transferts aéroport",
+        title: "Transferts a├⌐roport",
         description:
-          "Trajets vers et depuis YUL et YQB avec suivi des vols et accueil à l'arrivée.",
+          "Trajets vers et depuis YUL et YQB avec suivi des vols et accueil ├á l'arriv├⌐e.",
       },
       {
         title: "Transport corporatif",
         description:
-          "Comptes entreprise, facturation centralisée et chauffeurs discrets pour vos équipes.",
+          "Comptes entreprise, facturation centralis├⌐e et chauffeurs discrets pour vos ├⌐quipes.",
       },
       {
         title: "Courses en ville",
         description:
-          "Déplacements urbains rapides à prix fixe, sans surprise ni tarification dynamique.",
+          "D├⌐placements urbains rapides ├á prix fixe, sans surprise ni tarification dynamique.",
       },
       {
         title: "Longue distance",
         description:
-          "Voyages intervilles confortables entre Montréal, Québec, Laval, Gatineau et plus.",
+          "Voyages intervilles confortables entre Montr├⌐al, Qu├⌐bec, Laval, Gatineau et plus.",
       },
       {
-        title: "Événements & groupes",
+        title: "├ëv├⌐nements & groupes",
         description:
-          "Vans et véhicules multiples pour mariages, congrès et déplacements de groupe.",
+          "Vans et v├⌐hicules multiples pour mariages, congr├¿s et d├⌐placements de groupe.",
       },
       {
-        title: "Transport médical",
+        title: "Transport m├⌐dical",
         description:
-          "Rendez-vous médicaux ponctuels avec chauffeurs attentionnés et ponctuels.",
+          "Rendez-vous m├⌐dicaux ponctuels avec chauffeurs attentionn├⌐s et ponctuels.",
       },
     ],
   },
   howItWorks: {
-    title: "Réservez en trois étapes simples",
-    subtitle: "Aucune application requise — réservez directement en ligne.",
+    title: "R├⌐servez en trois ├⌐tapes simples",
+    subtitle: "Aucune application requise ΓÇö r├⌐servez directement en ligne.",
     steps: [
       {
         title: "Indiquez votre trajet",
         description:
-          "Entrez votre point de départ, votre destination et l'heure souhaitée.",
+          "Entrez votre point de d├⌐part, votre destination et l'heure souhait├⌐e.",
       },
       {
-        title: "Choisissez votre véhicule",
+        title: "Choisissez votre v├⌐hicule",
         description:
-          "Sélectionnez la catégorie qui vous convient et voyez le prix fixe à l'avance.",
+          "S├⌐lectionnez la cat├⌐gorie qui vous convient et voyez le prix fixe ├á l'avance.",
       },
       {
         title: "Suivez et voyagez",
         description:
-          "Recevez la confirmation, suivez votre chauffeur en temps réel et voyagez sereinement.",
+          "Recevez la confirmation, suivez votre chauffeur en temps r├⌐el et voyagez sereinement.",
       },
     ],
   },
   fleet: {
     title: "Une flotte pour chaque besoin",
-    subtitle: "Des véhicules entretenus, propres et confortables.",
-    perTrip: "à partir de",
+    subtitle: "Des v├⌐hicules entretenus, propres et confortables.",
+    perTrip: "├á partir de",
     seats: "places",
     book: "Choisir",
     items: [
       {
         name: "Berline",
-        description: "Idéale pour 1 à 3 passagers avec bagages standards.",
+        description: "Id├⌐ale pour 1 ├á 3 passagers avec bagages standards.",
         seats: 4,
         price: "25 $",
       },
@@ -133,7 +133,7 @@ const fr = {
       },
       {
         name: "Luxe",
-        description: "Berline haut de gamme pour vos déplacements d'affaires.",
+        description: "Berline haut de gamme pour vos d├⌐placements d'affaires.",
         seats: 3,
         price: "79 $",
       },
@@ -142,55 +142,55 @@ const fr = {
   features: {
     title: "Pourquoi choisir LogicMoov",
     subtitle:
-      "Une plateforme moderne conçue pour la fiabilité et la tranquillité d'esprit.",
+      "Une plateforme moderne con├ºue pour la fiabilit├⌐ et la tranquillit├⌐ d'esprit.",
     items: [
       {
         title: "Prix fixes garantis",
         description:
-          "Le prix affiché est le prix payé. Pas de tarification dynamique ni de mauvaises surprises.",
+          "Le prix affich├⌐ est le prix pay├⌐. Pas de tarification dynamique ni de mauvaises surprises.",
       },
       {
         title: "Disponible 24/7",
-        description: "Réservez à toute heure, tous les jours de l'année.",
+        description: "R├⌐servez ├á toute heure, tous les jours de l'ann├⌐e.",
       },
       {
-        title: "Suivi en temps réel",
+        title: "Suivi en temps r├⌐el",
         description:
           "Suivez votre chauffeur sur la carte et partagez votre trajet avec vos proches.",
       },
       {
-        title: "Chauffeurs vérifiés",
+        title: "Chauffeurs v├⌐rifi├⌐s",
         description:
-          "Des professionnels formés, courtois et vérifiés pour votre sécurité.",
+          "Des professionnels form├⌐s, courtois et v├⌐rifi├⌐s pour votre s├⌐curit├⌐.",
       },
       {
         title: "Suivi des vols",
         description:
-          "Nos chauffeurs ajustent l'heure de prise en charge selon votre vol réel.",
+          "Nos chauffeurs ajustent l'heure de prise en charge selon votre vol r├⌐el.",
       },
       {
         title: "Paiement flexible",
         description:
-          "Payez par carte, en ligne ou avec un compte corporatif — au choix.",
+          "Payez par carte, en ligne ou avec un compte corporatif ΓÇö au choix.",
       },
     ],
   },
   coverage: {
-    title: "Nous couvrons tout le Québec",
+    title: "Nous couvrons tout le Qu├⌐bec",
     subtitle:
-      "Service de taxi disponible dans les principales villes et aéroports de la province.",
+      "Service de taxi disponible dans les principales villes et a├⌐roports de la province.",
     cities: [
-      "Montréal",
-      "Ville de Québec",
+      "Montr├⌐al",
+      "Ville de Qu├⌐bec",
       "Laval",
       "Gatineau",
       "Sherbrooke",
-      "Trois-Rivières",
+      "Trois-Rivi├¿res",
       "Longueuil",
-      "Aéroport YUL",
-      "Aéroport YQB",
+      "A├⌐roport YUL",
+      "A├⌐roport YQB",
     ],
-    cta: "Votre ville n'est pas listée ?",
+    cta: "Votre ville n'est pas list├⌐e ?",
     ctaLink: "Contactez-nous",
   },
   testimonials: {
@@ -198,226 +198,226 @@ const fr = {
     items: [
       {
         quote:
-          "Réservation ultra simple et chauffeur à l'heure pour mon vol tôt le matin. Je recommande !",
+          "R├⌐servation ultra simple et chauffeur ├á l'heure pour mon vol t├┤t le matin. Je recommande !",
         author: "Marie-Claude L.",
-        role: "Montréal",
+        role: "Montr├⌐al",
       },
       {
         quote:
-          "Prix fixe annoncé à l'avance, aucune surprise. Parfait pour mes déplacements d'affaires.",
-        author: "Jean-François T.",
-        role: "Ville de Québec",
+          "Prix fixe annonc├⌐ ├á l'avance, aucune surprise. Parfait pour mes d├⌐placements d'affaires.",
+        author: "Jean-Fran├ºois T.",
+        role: "Ville de Qu├⌐bec",
       },
       {
         quote:
-          "Le suivi en temps réel m'a rassurée. Service propre, ponctuel et professionnel.",
+          "Le suivi en temps r├⌐el m'a rassur├⌐e. Service propre, ponctuel et professionnel.",
         author: "Sophie R.",
         role: "Laval",
       },
     ],
   },
   cta: {
-    title: "Prêt à réserver votre prochaine course ?",
+    title: "Pr├¬t ├á r├⌐server votre prochaine course ?",
     subtitle:
       "Obtenez un prix fixe en quelques secondes et voyagez l'esprit tranquille.",
-    primary: "Réserver maintenant",
+    primary: "R├⌐server maintenant",
     secondary: "Nous appeler",
   },
   booking: {
-    title: "Réservez votre course",
-    subtitle: "Prix fixe confirmé avant le départ. Aucune application requise.",
-    step: "Étape",
+    title: "R├⌐servez votre course",
+    subtitle: "Prix fixe confirm├⌐ avant le d├⌐part. Aucune application requise.",
+    step: "├ëtape",
     of: "de",
     steps: {
       trip: "Trajet",
-      vehicle: "Véhicule",
-      details: "Coordonnées",
+      vehicle: "V├⌐hicule",
+      details: "Coordonn├⌐es",
       confirm: "Confirmation",
     },
     tripType: "Type de trajet",
     oneWay: "Aller simple",
     roundTrip: "Aller-retour",
-    pickup: "Point de départ",
-    pickupPlaceholder: "Ex. 1000 Rue de la Gauchetière, Montréal",
+    pickup: "Point de d├⌐part",
+    pickupPlaceholder: "Ex. 1000 Rue de la Gaucheti├¿re, Montr├⌐al",
     dropoff: "Destination",
-    dropoffPlaceholder: "Ex. Aéroport Montréal-Trudeau (YUL)",
+    dropoffPlaceholder: "Ex. A├⌐roport Montr├⌐al-Trudeau (YUL)",
     date: "Date",
     time: "Heure",
     passengers: "Passagers",
     luggage: "Bagages",
-    chooseVehicle: "Choisissez votre véhicule",
-    estimatedPrice: "Prix estimé",
+    chooseVehicle: "Choisissez votre v├⌐hicule",
+    estimatedPrice: "Prix estim├⌐",
     fullName: "Nom complet",
     fullNamePlaceholder: "Votre nom",
     email: "Courriel",
     emailPlaceholder: "vous@exemple.com",
-    phone: "Téléphone",
+    phone: "T├⌐l├⌐phone",
     phonePlaceholder: "(514) 555-0123",
     notes: "Notes (optionnel)",
-    notesPlaceholder: "Numéro de vol, instructions spéciales…",
+    notesPlaceholder: "Num├⌐ro de vol, instructions sp├⌐cialesΓÇª",
     back: "Retour",
     next: "Continuer le paiement",
-    confirm: "Confirmer la réservation",
-    summary: "Résumé de la réservation",
-    successTitle: "Réservation confirmée !",
+    confirm: "Confirmer la r├⌐servation",
+    summary: "R├⌐sum├⌐ de la r├⌐servation",
+    successTitle: "R├⌐servation confirm├⌐e !",
     successMessage:
-      "Merci ! Votre demande a été reçue. Un chauffeur vous sera assigné et vous recevrez une confirmation par courriel.",
-    reference: "Numéro de référence",
-    newBooking: "Nouvelle réservation",
+      "Merci ! Votre demande a ├⌐t├⌐ re├ºue. Un chauffeur vous sera assign├⌐ et vous recevrez une confirmation par courriel.",
+    reference: "Num├⌐ro de r├⌐f├⌐rence",
+    newBooking: "Nouvelle r├⌐servation",
     required: "Ce champ est requis",
     invalidEmail: "Courriel invalide",
-    submitting: "Traitement en cours…",
-    errorTitle: "La réservation a échoué",
+    submitting: "Traitement en coursΓÇª",
+    errorTitle: "La r├⌐servation a ├⌐chou├⌐",
     errorGeneric:
-      "Une erreur est survenue lors de la réservation. Veuillez réessayer.",
+      "Une erreur est survenue lors de la r├⌐servation. Veuillez r├⌐essayer.",
     errorNetwork:
-      "Impossible de joindre le service de réservation. Assurez-vous que l'API est démarrée, puis réessayez.",
-    retry: "Réessayer",
-    paid: "Payé",
+      "Impossible de joindre le service de r├⌐servation. Assurez-vous que l'API est d├⌐marr├⌐e, puis r├⌐essayez.",
+    retry: "R├⌐essayer",
+    paid: "Pay├⌐",
     demoNote:
-      "Ceci est une démonstration. Aucun paiement réel n'est traité et aucun chauffeur n'est réellement envoyé.",
+      "Ceci est une d├⌐monstration. Aucun paiement r├⌐el n'est trait├⌐ et aucun chauffeur n'est r├⌐ellement envoy├⌐.",
   },
   about: {
-    title: "À propos de LogicMoov",
-    lead: "Nous modernisons le transport de taxi au Québec avec une technologie fiable et un service humain.",
+    title: "├Ç propos de LogicMoov",
+    lead: "Nous modernisons le transport de taxi au Qu├⌐bec avec une technologie fiable et un service humain.",
     body: [
-      "LogicMoov est né d'une idée simple : rendre le transport en taxi transparent, ponctuel et accessible partout dans la province. Fini les tarifs imprévisibles et l'attente incertaine.",
-      "Notre plateforme relie les voyageurs à un réseau de chauffeurs professionnels vérifiés, avec des prix fixes annoncés à l'avance et un suivi en temps réel de chaque course.",
-      "Des transferts aéroport aux déplacements d'affaires, notre mission est de vous amener à destination en toute confiance, en français comme en anglais.",
+      "LogicMoov est n├⌐ d'une id├⌐e simple : rendre le transport en taxi transparent, ponctuel et accessible partout dans la province. Fini les tarifs impr├⌐visibles et l'attente incertaine.",
+      "Notre plateforme relie les voyageurs ├á un r├⌐seau de chauffeurs professionnels v├⌐rifi├⌐s, avec des prix fixes annonc├⌐s ├á l'avance et un suivi en temps r├⌐el de chaque course.",
+      "Des transferts a├⌐roport aux d├⌐placements d'affaires, notre mission est de vous amener ├á destination en toute confiance, en fran├ºais comme en anglais.",
     ],
     valuesTitle: "Nos valeurs",
     values: [
-      { title: "Fiabilité", description: "Ponctualité et service constant à chaque course." },
-      { title: "Transparence", description: "Des prix fixes clairs, sans frais cachés." },
-      { title: "Sécurité", description: "Des chauffeurs vérifiés et des trajets traçables." },
-      { title: "Proximité", description: "Un service bilingue ancré dans les communautés du Québec." },
+      { title: "Fiabilit├⌐", description: "Ponctualit├⌐ et service constant ├á chaque course." },
+      { title: "Transparence", description: "Des prix fixes clairs, sans frais cach├⌐s." },
+      { title: "S├⌐curit├⌐", description: "Des chauffeurs v├⌐rifi├⌐s et des trajets tra├ºables." },
+      { title: "Proximit├⌐", description: "Un service bilingue ancr├⌐ dans les communaut├⌐s du Qu├⌐bec." },
     ],
-    registeredTitle: "Entreprise enregistrée",
+    registeredTitle: "Entreprise enregistr├⌐e",
     registeredText:
-      "LogicMoov est une entreprise enregistrée provincialement au Québec, Canada — NEQ 2282359860.",
+      "LogicMoov est une entreprise enregistr├⌐e provincialement au Qu├⌐bec, Canada ΓÇö NEQ 2282359860.",
     detailsTitle: "LogicMoov en bref",
     details: [
-      { label: "Numéro d'entreprise du Québec (NEQ)", value: "2282359860" },
-      { label: "En activité depuis", value: "2026" },
-      { label: "Taille de la flotte", value: "Plus de 30 véhicules" },
-      { label: "Régions desservies", value: "Montréal et les environs" },
+      { label: "Num├⌐ro d'entreprise du Qu├⌐bec (NEQ)", value: "2282359860" },
+      { label: "En activit├⌐ depuis", value: "2026" },
+      { label: "Taille de la flotte", value: "Plus de 30 v├⌐hicules" },
+      { label: "R├⌐gions desservies", value: "Montr├⌐al et les environs" },
       {
-        label: "Aéroport desservi",
-        value: "Aéroport international Montréal-Trudeau (YUL)",
+        label: "A├⌐roport desservi",
+        value: "A├⌐roport international Montr├⌐al-Trudeau (YUL)",
       },
     ],
-    vehicleTypesTitle: "Accessibilité et types de véhicules",
+    vehicleTypesTitle: "Accessibilit├⌐ et types de v├⌐hicules",
     vehicleTypesSubtitle:
-      "Une flotte variée pour répondre à tous les besoins de déplacement.",
+      "Une flotte vari├⌐e pour r├⌐pondre ├á tous les besoins de d├⌐placement.",
     vehicleTypes: [
       {
         name: "Berlines",
         description:
-          "Voitures standard à 4 portes pouvant accueillir jusqu'à 4 passagers pour les trajets réguliers.",
+          "Voitures standard ├á 4 portes pouvant accueillir jusqu'├á 4 passagers pour les trajets r├⌐guliers.",
       },
       {
         name: "Fourgonnettes",
         description:
-          "Véhicules multiplaces plus spacieux, conçus pour les familles ou petits groupes avec bagages supplémentaires.",
+          "V├⌐hicules multiplaces plus spacieux, con├ºus pour les familles ou petits groupes avec bagages suppl├⌐mentaires.",
       },
       {
-        name: "Taxis adaptés",
+        name: "Taxis adapt├⌐s",
         description:
-          "Véhicules spécialement équipés de rampes ou de plateformes élévatrices pour les voyageurs à mobilité réduite ou en fauteuil roulant.",
+          "V├⌐hicules sp├⌐cialement ├⌐quip├⌐s de rampes ou de plateformes ├⌐l├⌐vatrices pour les voyageurs ├á mobilit├⌐ r├⌐duite ou en fauteuil roulant.",
       },
     ],
   },
   contact: {
     title: "Contactez-nous",
-    subtitle: "Une question ou une réservation spéciale ? Nous sommes là pour vous.",
-    phoneTitle: "Téléphone",
+    subtitle: "Une question ou une r├⌐servation sp├⌐ciale ? Nous sommes l├á pour vous.",
+    phoneTitle: "T├⌐l├⌐phone",
     phone: "+514-266-4708",
     emailTitle: "Courriel",
     email: "info@logicmoov.ca",
     hoursTitle: "Heures",
     hours: "24 heures / 7 jours",
     addressTitle: "Bureau",
-    address: "1000 Rue de la Gauchetière O, Montréal, QC",
+    address: "1000 Rue de la Gaucheti├¿re O, Montr├⌐al, QC",
     formName: "Nom",
     formEmail: "Courriel",
     formMessage: "Message",
     formSubmit: "Envoyer le message",
-    formSuccess: "Merci ! Votre message a été envoyé.",
+    formSuccess: "Merci ! Votre message a ├⌐t├⌐ envoy├⌐.",
   },
   cancellationPolicy: {
     title: "Politique d'annulation",
     lead:
-      "Nous comprenons que les plans peuvent changer. Voici comment fonctionnent les annulations et modifications pour les réservations LogicMoov.",
+      "Nous comprenons que les plans peuvent changer. Voici comment fonctionnent les annulations et modifications pour les r├⌐servations LogicMoov.",
     items: [
       {
         title: "Annulation gratuite",
         description:
-          "Vous pouvez annuler gratuitement jusqu'à 2 heures avant l'heure de prise en charge prévue.",
+          "Vous pouvez annuler gratuitement jusqu'├á 2 heures avant l'heure de prise en charge pr├⌐vue.",
       },
       {
         title: "Annulation tardive",
         description:
-          "Toute annulation effectuée moins de 2 heures avant la prise en charge peut entraîner des frais correspondant à une partie du tarif estimé.",
+          "Toute annulation effectu├⌐e moins de 2 heures avant la prise en charge peut entra├«ner des frais correspondant ├á une partie du tarif estim├⌐.",
       },
       {
-        title: "Non-présentation",
+        title: "Non-pr├⌐sentation",
         description:
-          "Si le chauffeur se présente à l'heure et au lieu convenus et que le passager reste introuvable après 15 minutes d'attente (30 minutes pour les transferts aéroport), la course est considérée comme non honorée et les frais applicables sont facturés.",
+          "Si le chauffeur se pr├⌐sente ├á l'heure et au lieu convenus et que le passager reste introuvable apr├¿s 15 minutes d'attente (30 minutes pour les transferts a├⌐roport), la course est consid├⌐r├⌐e comme non honor├⌐e et les frais applicables sont factur├⌐s.",
       },
       {
-        title: "Modifications de réservation",
+        title: "Modifications de r├⌐servation",
         description:
-          "Vous pouvez modifier l'heure, le lieu ou le véhicule de votre réservation gratuitement, sous réserve de disponibilité, en nous contactant avant l'heure prévue.",
+          "Vous pouvez modifier l'heure, le lieu ou le v├⌐hicule de votre r├⌐servation gratuitement, sous r├⌐serve de disponibilit├⌐, en nous contactant avant l'heure pr├⌐vue.",
       },
       {
         title: "Annulation par LogicMoov",
         description:
-          "Dans le cas rare où une course devrait être annulée de notre côté, vous serez averti dans les plus brefs délais et intégralement remboursé si un paiement a déjà été effectué.",
+          "Dans le cas rare o├╣ une course devrait ├¬tre annul├⌐e de notre c├┤t├⌐, vous serez averti dans les plus brefs d├⌐lais et int├⌐gralement rembours├⌐ si un paiement a d├⌐j├á ├⌐t├⌐ effectu├⌐.",
       },
       {
         title: "Comment annuler",
         description:
-          "Pour annuler ou modifier une réservation, contactez-nous au +514-266-4708 ou à info@logicmoov.ca.",
+          "Pour annuler ou modifier une r├⌐servation, contactez-nous au +514-266-4708 ou ├á info@logicmoov.ca.",
       },
     ],
   },
   footer: {
-    tagline: "Transport de taxi moderne, fiable et bilingue partout au Québec.",
+    tagline: "Transport de taxi moderne, fiable et bilingue partout au Qu├⌐bec.",
     company: "Entreprise",
     servicesCol: "Services",
-    legal: "Légal",
-    privacy: "Confidentialité",
+    legal: "L├⌐gal",
+    privacy: "Confidentialit├⌐",
     terms: "Conditions d'utilisation",
-    accessibility: "Accessibilité",
+    accessibility: "Accessibilit├⌐",
     cancellationPolicy: "Politique d'annulation",
-    rights: "Tous droits réservés. NEQ 2282359860.",
+    rights: "Tous droits r├⌐serv├⌐s. NEQ 2282359860.",
     langLabel: "Langue",
   },
   chat: {
     launcher: "Aide",
     title: "Assistance LogicMoov",
-    subtitleBot: "Assistant virtuel · réponses instantanées",
-    subtitleWaiting: "Mise en relation avec un agent…",
+    subtitleBot: "Assistant virtuel ┬╖ r├⌐ponses instantan├⌐es",
+    subtitleWaiting: "Mise en relation avec un agentΓÇª",
     subtitleAgent: "Vous discutez avec un agent",
-    subtitleResolved: "Conversation terminée",
+    subtitleResolved: "Conversation termin├⌐e",
     greeting:
-      "Bonjour ! Comment puis-je vous aider aujourd'hui ? Posez-moi une question sur les prix, la réservation ou nos services.",
-    placeholder: "Écrivez votre message…",
+      "Bonjour ! Comment puis-je vous aider aujourd'hui ? Posez-moi une question sur les prix, la r├⌐servation ou nos services.",
+    placeholder: "├ëcrivez votre messageΓÇª",
     send: "Envoyer",
-    talkToHuman: "Parler à un agent",
-    startError: "Impossible de démarrer la conversation. Réessayez plus tard.",
+    talkToHuman: "Parler ├á un agent",
+    startError: "Impossible de d├⌐marrer la conversation. R├⌐essayez plus tard.",
     poweredBy: "Assistant IA + agents en direct",
     you: "Vous",
     bot: "Assistant",
     agent: "Agent",
-    system: "Système",
+    system: "Syst├¿me",
     newChat: "Nouvelle conversation",
     offline: "Service de clavardage indisponible.",
     agentsOffline:
-      "Nos agents ne sont pas joignables via le clavardage pour le moment. Appelez-nous au +1 (514) 555-0123 ou écrivez à info@logicmoov.ca et nous vous répondrons rapidement.",
+      "Nos agents ne sont pas joignables via le clavardage pour le moment. Appelez-nous au +1 (514) 555-0123 ou ├⌐crivez ├á info@logicmoov.ca et nous vous r├⌐pondrons rapidement.",
   },
   common: {
-    loading: "Chargement…",
+    loading: "ChargementΓÇª",
   },
 };
 
@@ -443,7 +443,7 @@ const en: Dictionary = {
     title: "Your ride, made simple",
     titleAccent: "across Quebec",
     subtitle:
-      "Book a reliable taxi in seconds. Fixed prices, professional drivers and real-time tracking — from Montreal to Quebec City and beyond.",
+      "Book a reliable taxi in seconds. Fixed prices, professional drivers and real-time tracking ΓÇö from Montreal to Quebec City and beyond.",
     ctaPrimary: "Book a ride",
     ctaSecondary: "See how it works",
     trust: "Trusted by thousands of Quebec travellers",
@@ -485,7 +485,7 @@ const en: Dictionary = {
       {
         title: "City rides",
         description:
-          "Fast urban trips at a fixed price — no surprises, no surge pricing.",
+          "Fast urban trips at a fixed price ΓÇö no surprises, no surge pricing.",
       },
       {
         title: "Long distance",
@@ -506,7 +506,7 @@ const en: Dictionary = {
   },
   howItWorks: {
     title: "Book in three simple steps",
-    subtitle: "No app required — book directly online.",
+    subtitle: "No app required ΓÇö book directly online.",
     steps: [
       {
         title: "Enter your trip",
@@ -590,7 +590,7 @@ const en: Dictionary = {
       {
         title: "Flexible payment",
         description:
-          "Pay by card, online or with a corporate account — your choice.",
+          "Pay by card, online or with a corporate account ΓÇö your choice.",
       },
     ],
   },
@@ -604,7 +604,7 @@ const en: Dictionary = {
       "Laval",
       "Gatineau",
       "Sherbrooke",
-      "Trois-Rivières",
+      "Trois-Rivi├¿res",
       "Longueuil",
       "YUL Airport",
       "YQB Airport",
@@ -624,7 +624,7 @@ const en: Dictionary = {
       {
         quote:
           "Fixed price announced up front, no surprises. Perfect for my business travel.",
-        author: "Jean-François T.",
+        author: "Jean-Fran├ºois T.",
         role: "Quebec City",
       },
       {
@@ -657,7 +657,7 @@ const en: Dictionary = {
     oneWay: "One way",
     roundTrip: "Round trip",
     pickup: "Pickup",
-    pickupPlaceholder: "e.g. 1000 De la Gauchetière St, Montreal",
+    pickupPlaceholder: "e.g. 1000 De la Gaucheti├¿re St, Montreal",
     dropoff: "Destination",
     dropoffPlaceholder: "e.g. Montreal-Trudeau Airport (YUL)",
     date: "Date",
@@ -673,7 +673,7 @@ const en: Dictionary = {
     phone: "Phone",
     phonePlaceholder: "(514) 555-0123",
     notes: "Notes (optional)",
-    notesPlaceholder: "Flight number, special instructions…",
+    notesPlaceholder: "Flight number, special instructionsΓÇª",
     back: "Back",
     next: "Continue payment",
     confirm: "Confirm booking",
@@ -685,7 +685,7 @@ const en: Dictionary = {
     newBooking: "New booking",
     required: "This field is required",
     invalidEmail: "Invalid email",
-    submitting: "Processing…",
+    submitting: "ProcessingΓÇª",
     errorTitle: "Booking failed",
     errorGeneric:
       "Something went wrong while booking. Please try again.",
@@ -702,7 +702,7 @@ const en: Dictionary = {
     body: [
       "LogicMoov was born from a simple idea: make taxi travel transparent, punctual and accessible everywhere in the province. No more unpredictable fares or uncertain waiting.",
       "Our platform connects travellers to a network of verified professional drivers, with fixed prices announced up front and real-time tracking of every ride.",
-      "From airport transfers to business travel, our mission is to get you to your destination with confidence — in French and in English.",
+      "From airport transfers to business travel, our mission is to get you to your destination with confidence ΓÇö in French and in English.",
     ],
     valuesTitle: "Our values",
     values: [
@@ -713,16 +713,16 @@ const en: Dictionary = {
     ],
     registeredTitle: "Registered business",
     registeredText:
-      "LogicMoov is a provincially registered business in Québec, Canada — NEQ 2282359860.",
+      "LogicMoov is a provincially registered business in Qu├⌐bec, Canada ΓÇö NEQ 2282359860.",
     detailsTitle: "LogicMoov at a glance",
     details: [
-      { label: "Québec business number (NEQ)", value: "2282359860" },
+      { label: "Qu├⌐bec business number (NEQ)", value: "2282359860" },
       { label: "In business since", value: "2026" },
       { label: "Fleet size", value: "30+ vehicles" },
       { label: "Regions served", value: "Montreal and surrounding area" },
       {
         label: "Airport served",
-        value: "Montréal Trudeau International Airport",
+        value: "Montr├⌐al Trudeau International Airport",
       },
     ],
     vehicleTypesTitle: "Accessibility & Vehicle Types",
@@ -755,7 +755,7 @@ const en: Dictionary = {
     hoursTitle: "Hours",
     hours: "24 hours / 7 days",
     addressTitle: "Office",
-    address: "1000 De la Gauchetière St W, Montreal, QC",
+    address: "1000 De la Gaucheti├¿re St W, Montreal, QC",
     formName: "Name",
     formEmail: "Email",
     formMessage: "Message",
@@ -814,13 +814,13 @@ const en: Dictionary = {
   chat: {
     launcher: "Help",
     title: "LogicMoov Support",
-    subtitleBot: "Virtual assistant · instant answers",
-    subtitleWaiting: "Connecting you to an agent…",
+    subtitleBot: "Virtual assistant ┬╖ instant answers",
+    subtitleWaiting: "Connecting you to an agentΓÇª",
     subtitleAgent: "You're chatting with an agent",
     subtitleResolved: "Conversation ended",
     greeting:
       "Hi! How can I help you today? Ask me about pricing, booking or our services.",
-    placeholder: "Type your message…",
+    placeholder: "Type your messageΓÇª",
     send: "Send",
     talkToHuman: "Talk to an agent",
     startError: "Couldn't start the conversation. Please try again later.",
@@ -835,7 +835,7 @@ const en: Dictionary = {
       "Our agents aren't reachable via chat right now. Call us at +1 (514) 555-0123 or email info@logicmoov.ca and we'll get back to you quickly.",
   },
   common: {
-    loading: "Loading…",
+    loading: "LoadingΓÇª",
   },
 };
 

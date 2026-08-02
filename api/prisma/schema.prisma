@@ -1,0 +1,317 @@
+// TAXIMOVQC — PostgreSQL data model
+// Docs: https://pris.ly/d/prisma-schema
+
+model RouteRate {
+  id                   String          @id @default(cuid())
+  originZone           String
+  destinationZone      String
+  category             VehicleCategory
+  priceCents           Int
+  currency             String          @default("CAD")
+  meetAndGreetFeeCents Int?
+  includedWaitMin      Int             @default(60)
+  active               Boolean         @default(true)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  @@unique([originZone, destinationZone, category])
+  @@index([originZone, destinationZone])
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+
+enum Role {
+  CUSTOMER
+  DRIVER
+  ADMIN
+  AGENT
+}
+
+enum VehicleCategory {
+  SEDAN
+  SUV
+  VAN
+  LUXURY
+}
+
+enum DriverStatus {
+  OFFLINE
+  AVAILABLE
+  BUSY
+}
+
+enum TripType {
+  ONE_WAY
+  ROUND_TRIP
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  ASSIGNED
+  EN_ROUTE
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  CASH
+  CORPORATE
+}
+
+// ---------- Models ----------
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(CUSTOMER)
+  fullName     String
+  phone        String?
+  locale       String    @default("fr")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  driverProfile DriverProfile?
+  bookings      Booking[]       @relation("CustomerBookings")
+  refreshTokens RefreshToken[]
+
+  conversations      Conversation[] @relation("CustomerConversations")
+  agentConversations Conversation[] @relation("AgentConversations")
+
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model DriverProfile {
+  id            String       @id @default(cuid())
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String       @unique
+  licenseNumber String       @unique
+  status        DriverStatus @default(OFFLINE)
+  rating        Float        @default(5)
+  currentLat    Float?
+  currentLng    Float?
+  lastSeenAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  vehicle  Vehicle?
+  bookings Booking[] @relation("DriverBookings")
+
+  @@index([status])
+}
+
+model Vehicle {
+  id        String          @id @default(cuid())
+  category  VehicleCategory
+  make      String
+  model     String
+  year      Int
+  plate     String          @unique
+  seats     Int             @default(4)
+  active    Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  driver   DriverProfile? @relation(fields: [driverId], references: [id])
+  driverId String?        @unique
+
+maxLuggage Int     @default(2)
+  accessible Boolean @default(false)
+
+  @@index([category])
+}
+
+model PricingRule {
+  id           String          @id @default(cuid())
+  category     VehicleCategory @unique
+  baseFareCents Int
+  perKmCents   Int
+  multiplier   Float           @default(1)
+  currency     String          @default("CAD")
+  active       Boolean         @default(true)
+  updatedAt    DateTime        @updatedAt
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  reference    String        @unique
+  status       BookingStatus @default(PENDING)
+  tripType     TripType      @default(ONE_WAY)
+  category     VehicleCategory
+
+  // Customer (optional for guest bookings)
+  customer   User?   @relation("CustomerBookings", fields: [customerId], references: [id])
+  customerId String?
+
+  // Assigned driver
+  driver   DriverProfile? @relation("DriverBookings", fields: [driverId], references: [id])
+  driverId String?
+
+  // Trip details
+  pickupAddress  String
+  pickupLat      Float?
+  pickupLng      Float?
+  dropoffAddress String
+  dropoffLat     Float?
+  dropoffLng     Float?
+  scheduledAt    DateTime
+  passengers     Int      @default(1)
+  luggage        Int      @default(0)
+  distanceKm     Float
+  notes          String?
+
+  // Pricing (stored in cents)
+  priceCents Int
+  currency   String @default("CAD")
+
+  // Guest contact snapshot
+  contactName  String
+  contactEmail String
+  contactPhone String
+
+  payment        Payment?
+  trackingEvents TrackingEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([customerId])
+  @@index([driverId])
+  @@index([scheduledAt])
+
+source          BookingSource @default(DIRECT)
+  externalRef     String?
+  flightNumber    String?
+  cancelledBy     CancelledBy?
+  cancelledReason String?
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  booking     Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId   String        @unique
+  amountCents Int
+  currency    String        @default("CAD")
+  status      PaymentStatus @default(PENDING)
+  method      PaymentMethod @default(CARD)
+  provider    String        @default("mock")
+  providerRef String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model TrackingEvent {
+  id        String        @id @default(cuid())
+  booking   Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId String
+  lat       Float
+  lng       Float
+  status    BookingStatus?
+  createdAt DateTime      @default(now())
+
+  @@index([bookingId])
+}
+
+// ---------- Support / Chat ----------
+
+enum ConversationStatus {
+  BOT           // handled by the AI assistant
+  WAITING_AGENT // customer requested a human; queued
+  WITH_AGENT    // a human agent is handling it
+  RESOLVED      // closed
+}
+
+enum MessageSender {
+  CUSTOMER
+  BOT
+  AGENT
+  SYSTEM
+}
+
+model Conversation {
+  id               String             @id @default(cuid())
+  status           ConversationStatus @default(BOT)
+  locale           String             @default("fr")
+  subject          String?
+  bookingReference String?
+
+  // Customer (optional for guests)
+  customer   User?   @relation("CustomerConversations", fields: [customerId], references: [id])
+  customerId String?
+  guestName  String?
+  guestEmail String?
+
+  // Assigned agent
+  agent   User?   @relation("AgentConversations", fields: [agentId], references: [id])
+  agentId String?
+
+  messages Message[]
+
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([customerId])
+  @@index([agentId])
+}
+
+model Message {
+  id             String        @id @default(cuid())
+  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+  sender         MessageSender
+  senderName     String?
+  body           String
+  createdAt      DateTime      @default(now())
+
+  @@index([conversationId])
+}
+
+enum CancelledBy {
+  CUSTOMER
+  LOGICMOOV
+  SUPPLIER
+  NO_SHOW
+}
+
+enum BookingSource {
+  DIRECT
+  BOOKING_COM
+  HOLIDAY_TAXIS
+  VIATOR
+  GET_YOUR_GUIDE
+  EXPEDIA
+}
