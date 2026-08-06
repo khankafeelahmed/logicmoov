@@ -27,12 +27,12 @@ import {
   type VehicleId,
 } from "@/lib/pricing";
 import { api, ApiError } from "@/lib/api";
+import { GOOGLE_MAPS_LIBRARIES, GOOGLE_MAPS_LOADER_ID } from "@/lib/googleMaps";
 
 type TripType = "oneWay" | "roundTrip";
 type StepKey = "trip" | "passengers" | "vehicle" | "details" | "confirm";
 type AddressSuggestion = { name: string; address: string; lat: number; lng: number };
 type Coordinates = { lat: number; lng: number };
-const GOOGLE_LIBRARIES: ("places")[] = ["places"];
 
 const STEP_KEYS: StepKey[] = ["trip", "passengers", "vehicle", "details", "confirm"];
 
@@ -139,9 +139,9 @@ export default function BookingForm({
   } | null>(null);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
   const { isLoaded: isGoogleMapsLoaded } = useJsApiLoader({
-    id: "logicmoov-google-maps",
+    id: GOOGLE_MAPS_LOADER_ID,
     googleMapsApiKey,
-    libraries: GOOGLE_LIBRARIES,
+    libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
   const totalPassengers = adults + children + infants;

@@ -12,9 +12,9 @@ import {
   mockDistanceKm,
 } from "@/lib/pricing";
 import { api } from "@/lib/api";
+import { GOOGLE_MAPS_LIBRARIES, GOOGLE_MAPS_LOADER_ID } from "@/lib/googleMaps";
 
 type AddressSuggestion = { name: string; address: string; lat: number; lng: number };
-const GOOGLE_LIBRARIES: ("places")[] = ["places"];
 
 export default function QuickEstimate({
   locale,
@@ -31,9 +31,9 @@ export default function QuickEstimate({
   const [locationError, setLocationError] = useState<string | null>(null);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
   const { isLoaded: isGoogleMapsLoaded } = useJsApiLoader({
-    id: "logicmoov-google-maps-quick-estimate",
+    id: GOOGLE_MAPS_LOADER_ID,
     googleMapsApiKey,
-    libraries: GOOGLE_LIBRARIES,
+    libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
   useEffect(() => {
