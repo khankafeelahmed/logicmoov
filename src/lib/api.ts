@@ -14,6 +14,12 @@ function isLocalHost(hostname: string) {
 }
 
 function resolveApiBaseUrl(): string {
+  // In local development, always prefer the local backend to avoid
+  // cross-origin issues with remote deployments.
+  if (typeof window !== "undefined" && isLocalHost(window.location.hostname)) {
+    return DEFAULT_LOCAL_API_URL;
+  }
+
   const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
   if (!configured) {
     if (
