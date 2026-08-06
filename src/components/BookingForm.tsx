@@ -8,13 +8,11 @@ import {
   ArrowRight,
   Calendar,
   CheckCircle2,
-  CircleAlert,
   Clock,
   MapPin,
   Navigation,
   Users,
   Loader2,
-  ShieldCheck,
 } from "lucide-react";
 import { useJsApiLoader } from "@react-google-maps/api";
 import type { Locale } from "@/i18n/config";
@@ -132,11 +130,6 @@ export default function BookingForm({
     vehicle: string;
   } | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
-  const [backendHealth, setBackendHealth] = useState<{
-    api: "ok" | "degraded" | "down";
-    database: "ok" | "down";
-    message?: string;
-  } | null>(null);
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
   const { isLoaded: isGoogleMapsLoaded } = useJsApiLoader({
     id: GOOGLE_MAPS_LOADER_ID,
@@ -146,7 +139,6 @@ export default function BookingForm({
 
   const totalPassengers = adults + children + infants;
   const airportTransfer = isAirportTransfer(pickup, dropoff);
-  const stripeReady = Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
   const recommendedVehicles = useMemo(() => {
     const matches = vehicleOrder.filter(
@@ -262,29 +254,6 @@ export default function BookingForm({
       cancelled = true;
     };
   }, [step, pickupCoords, dropoffCoords, adults, children, infants]);
-
-  useEffect(() => {
-    let cancelled = false;
-    api
-      .getBackendHealth()
-      .then((health) => {
-        if (cancelled) return;
-        setBackendHealth({
-          api: health.checks?.api === "ok" ? "ok" : "degraded",
-          database: health.checks?.database === "ok" ? "ok" : "down",
-          message: health.error,
-        });
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setBackendHealth({ api: "down", database: "down", message: "API unavailable" });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   function setPassengerCount(setter: Dispatch<SetStateAction<number>>, value: number) {
     setter(Math.min(8, Math.max(0, value)));
@@ -480,28 +449,6 @@ export default function BookingForm({
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-ink-100 bg-white px-4 py-3 shadow-sm">
-        <span className="text-sm font-semibold text-ink-700">System status</span>
-        <StatusChip
-          label="API"
-          ok={backendHealth?.api === "ok"}
-          degraded={backendHealth?.api === "degraded"}
-        />
-        <StatusChip
-          label="DB"
-          ok={backendHealth?.database === "ok"}
-          degraded={false}
-        />
-        <StatusChip label="Maps" ok={Boolean(googleMapsApiKey)} degraded={!googleMapsApiKey} />
-        <StatusChip label="Stripe" ok={stripeReady} degraded={!stripeReady} />
-        {backendHealth?.message && (
-          <span className="inline-flex items-center gap-1 text-xs text-amber-600">
-            <CircleAlert className="h-3.5 w-3.5" />
-            {backendHealth.message}
-          </span>
-        )}
-      </div>
-
       <ol className="mb-8 flex items-center justify-between gap-2">
         {STEP_KEYS.map((key, index) => {
           const active = index === step;
@@ -1044,27 +991,5 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt className="text-ink-500">{label}</dt>
       <dd className="text-right font-medium text-ink-900">{value || "—"}</dd>
     </div>
-  );
-}
-
-function StatusChip({
-  label,
-  ok,
-  degraded,
-}: {
-  label: string;
-  ok: boolean;
-  degraded: boolean;
-}) {
-  const classes = ok
-    ? "bg-green-100 text-green-700"
-    : degraded
-      ? "bg-amber-100 text-amber-700"
-      : "bg-red-100 text-red-700";
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${classes}`}>
-      <ShieldCheck className="h-3.5 w-3.5" />
-      {label}: {ok ? "OK" : degraded ? "Degraded" : "Down"}
-    </span>
   );
 }
