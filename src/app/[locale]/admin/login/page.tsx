@@ -95,7 +95,7 @@ export default function AdminLoginPage({
         </form>
 
         <p className="mt-4 text-center text-xs text-ink-400">
-          Seeded admin: admin@logicmoov.ca / Admin1234!
+          Seeded admin: admin@logicmoov.ca / LogicMoov@786
         </p>
       </div>
     </div>

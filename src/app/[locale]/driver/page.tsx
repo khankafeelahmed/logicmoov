@@ -40,6 +40,8 @@ export default function DriverPortalPage() {
     password: "",
   });
   const [verificationCode, setVerificationCode] = useState("");
+  const [verificationMode, setVerificationMode] = useState<"email" | "demo">("email");
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const activeSession = getDriverSession();
@@ -124,6 +126,75 @@ export default function DriverPortalPage() {
     refreshDriverFleetData();
   }, [refreshDriverFleetData]);
 
+  async function sendVerificationCode(account: DriverPortalAccount) {
+    const canUseDemoFallback =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname === "::1");
+
+    try {
+      const response = await fetch("/api/driver/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: account.email,
+          code: account.verificationCode,
+          fullName: account.fullName,
+        }),
+      });
+
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        fallback?: boolean;
+        message?: string;
+        error?: string;
+      };
+
+      if (payload.ok) {
+        if (payload.fallback) {
+          if (canUseDemoFallback) {
+            setVerificationMode("demo");
+            setVerificationMessage(payload.message ?? "Demo verification mode is active.");
+          } else {
+            setVerificationMode("email");
+            setVerificationMessage("Verification email could not be sent. Please contact support.");
+            setError(payload.message ?? "Verification email delivery is not configured.");
+          }
+        } else {
+          setVerificationMode("email");
+          setVerificationMessage("Please check your inbox and spam folder.");
+        }
+        return;
+      }
+
+      if (payload.fallback) {
+        if (canUseDemoFallback) {
+          setVerificationMode("demo");
+          setVerificationMessage(payload.message ?? "Demo verification mode is active.");
+        } else {
+          setVerificationMode("email");
+          setVerificationMessage("Verification email could not be sent. Please contact support.");
+          setError(payload.message ?? "Verification email delivery is not configured.");
+        }
+        return;
+      }
+
+      setVerificationMode("email");
+      setVerificationMessage(payload.error ?? "Could not send verification email.");
+      setError(payload.error ?? "Could not send verification email.");
+    } catch {
+      if (canUseDemoFallback) {
+        setVerificationMode("demo");
+        setVerificationMessage("Email service is temporarily unavailable. Demo verification mode is active.");
+      } else {
+        setVerificationMode("email");
+        setVerificationMessage("Verification email service is currently unavailable. Please try again later.");
+        setError("Verification email service is currently unavailable.");
+      }
+    }
+  }
+
   async function handleRegister(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
@@ -137,22 +208,10 @@ export default function DriverPortalPage() {
         password: registerForm.password,
       });
 
-      try {
-        await fetch("/api/driver/send-verification", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: account.email,
-            code: account.verificationCode,
-            fullName: account.fullName,
-          }),
-        });
-      } catch {
-        // Ignore email provider errors and keep the in-app demo code visible.
-      }
-
       setPending(account);
+      setVerificationCode("");
       setScreen("verify");
+      await sendVerificationCode(account);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to register driver account.");
     }
@@ -172,13 +231,14 @@ export default function DriverPortalPage() {
       const verified = verifyDriverAccount(pending.email, verificationCode);
       setSession(verified);
       setPending(null);
+      setVerificationMessage(null);
       setScreen("dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed.");
     }
   }
 
-  function handleLogin(event: React.FormEvent) {
+  async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
 
@@ -187,7 +247,9 @@ export default function DriverPortalPage() {
 
       if (account.status === "pending") {
         setPending(account);
+        setVerificationCode("");
         setScreen("verify");
+        await sendVerificationCode(account);
         return;
       }
 
@@ -296,14 +358,14 @@ export default function DriverPortalPage() {
               <div className="mb-6 flex rounded-full bg-[#f3eee2] p-1">
                 <button
                   type="button"
-                  onClick={() => { setScreen("login"); setError(null); }}
+                  onClick={() => { setScreen("login"); setError(null); setVerificationMessage(null); }}
                   className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold ${screen === "login" ? "bg-ink-900 text-white" : "text-ink-700"}`}
                 >
                   Login
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setScreen("register"); setError(null); }}
+                  onClick={() => { setScreen("register"); setError(null); setVerificationMessage(null); }}
                   className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold ${screen === "register" ? "bg-ink-900 text-white" : "text-ink-700"}`}
                 >
                   Register
@@ -423,7 +485,12 @@ export default function DriverPortalPage() {
                 <form onSubmit={handleVerify} className="space-y-4">
                   <div className="rounded-2xl border border-brand-200 bg-brand-50 p-4 text-sm text-brand-700">
                     <p className="font-semibold">Verification code sent to {pending.email}</p>
-                    <p className="mt-1">Demo code: <span className="font-black">{pending.verificationCode}</span></p>
+                    {verificationMode === "demo" ? (
+                      <p className="mt-1">Demo code: <span className="font-black">{pending.verificationCode}</span></p>
+                    ) : (
+                      <p className="mt-1">Check your email inbox for the verification code.</p>
+                    )}
+                    {verificationMessage && <p className="mt-1 text-xs">{verificationMessage}</p>}
                   </div>
                   <label className="block">
                     <span className="mb-1 block text-sm font-semibold text-ink-700">Enter verification code</span>

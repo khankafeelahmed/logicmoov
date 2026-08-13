@@ -60,7 +60,7 @@ async function main() {
   });
 
   // Admin user
-  const adminPassword = await bcrypt.hash("Admin1234!", 10);
+  const adminPassword = await bcrypt.hash("LogicMoov@786", 10);
   await prisma.user.upsert({
     where: { email: "admin@taximovqc.ca" },
     update: {},

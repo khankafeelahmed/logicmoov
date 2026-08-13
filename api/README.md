@@ -50,7 +50,7 @@ Important env vars for production:
 
 | Role   | Email                     | Password       |
 | ------ | ------------------------- | -------------- |
-| Admin  | `admin@taximovqc.ca`     | `Admin1234!`   |
+| Admin  | `admin@taximovqc.ca`     | `LogicMoov@786` |
 | Driver | `driver@taximovqc.ca`    | `Driver1234!`  |
 | Agent  | `agent@taximovqc.ca`     | `Agent1234!`   |
 

@@ -84,7 +84,7 @@ Visit `/[locale]/admin` (e.g. http://localhost:3000/en/admin). You'll be redirec
 to the login page. Use the seeded admin credentials from the backend:
 
 - **Email:** `admin@logicmoov.ca`
-- **Password:** `Admin1234!`
+- **Password:** `LogicMoov@786`
 
 Requires the backend API + a seeded database.
 
@@ -98,4 +98,3 @@ Maps distance and payment are **mocked** for now:
 ## Roadmap (from the platform architecture)
 
 This web app is the first piece of a larger platform. Planned services (API gateway, auth, booking, pricing, dispatch AI, payments, tracking, notifications, fleet management, analytics, Booking.com / Google Maps / flight-tracking connectors) can grow alongside this app in the same repository.
-

@@ -49,7 +49,7 @@ function resolveApiBaseUrl(): string {
 export const API_BASE_URL = resolveApiBaseUrl();
 
 const LOCAL_ADMIN_EMAIL = "admin@logicmoov.ca";
-const LOCAL_ADMIN_PASSWORD = "Admin1234!";
+const LOCAL_ADMIN_PASSWORD = "LogicMoov@786";
 const LOCAL_DRIVER_KEY = "taxi_logicmoov_local_drivers";
 const LOCAL_VEHICLE_KEY = "taxi_logicmoov_local_vehicles";
 
