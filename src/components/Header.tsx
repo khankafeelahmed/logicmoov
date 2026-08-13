@@ -24,6 +24,7 @@ export default function Header({
     { label: dict.nav.coverage, href: `${base}#coverage` },
     { label: dict.nav.about, href: `${base}/about` },
     { label: dict.nav.contact, href: `${base}/contact` },
+    { label: "Driver Portal", href: `${base}/driver` },
   ];
 
   return (
@@ -33,8 +34,10 @@ export default function Header({
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink-900 text-brand-400">
             <Car className="h-5 w-5" />
           </span>
-          <span className="text-lg font-extrabold tracking-tight text-ink-900">
-            Logic<span className="text-brand-600">Moov</span>
+          <span className="text-lg font-extrabold tracking-tight">
+            <span className="text-ink-900">Taxi</span>{" "}
+            <span className="text-ink-900">Logic</span>
+            <span className="text-brand-500">Moov</span>
           </span>
         </Link>
 

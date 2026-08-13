@@ -4,7 +4,7 @@ export type Dictionary = typeof fr;
 
 const fr = {
   brand: {
-    name: "LogicMoov",
+    name: "Taxi LogicMoov",
     tagline: "Transport de taxi moderne au Qu├⌐bec",
   },
   nav: {
@@ -140,7 +140,7 @@ const fr = {
     ],
   },
   features: {
-    title: "Pourquoi choisir LogicMoov",
+    title: "Pourquoi choisir Taxi LogicMoov",
     subtitle:
       "Une plateforme moderne con├ºue pour la fiabilit├⌐ et la tranquillit├⌐ d'esprit.",
     items: [
@@ -293,17 +293,17 @@ const fr = {
       "Ceci est une d├⌐monstration. Aucun paiement r├⌐el n'est trait├⌐ et aucun chauffeur n'est r├⌐ellement envoy├⌐.",
   },
   about: {
-    title: "├Ç propos de LogicMoov",
+    title: "├Ç propos de Taxi LogicMoov",
     lead: "Nous modernisons le transport de taxi au Qu├⌐bec avec une technologie fiable et un service humain.",
     body: [
-      "LogicMoov est n├⌐ d'une id├⌐e simple : rendre le transport en taxi transparent, ponctuel et accessible partout dans la province. Fini les tarifs impr├⌐visibles et l'attente incertaine.",
+      "Taxi LogicMoov est n├⌐ d'une id├⌐e simple : rendre le transport en taxi transparent, ponctuel et accessible partout dans la province. Fini les tarifs impr├⌐visibles et l'attente incertaine.",
       "Notre plateforme relie les voyageurs ├á un r├⌐seau de chauffeurs professionnels v├⌐rifi├⌐s, avec des prix fixes annonc├⌐s ├á l'avance et un suivi en temps r├⌐el de chaque course.",
       "Des transferts a├⌐roport aux d├⌐placements d'affaires, notre mission est de vous amener ├á destination en toute confiance, en fran├ºais comme en anglais.",
     ],
     valuesTitle: "Nos valeurs",
     foundersTitle: "Rencontrez les fondateurs",
     foundersSubtitle:
-      "D├⌐couvrez l'├⌐quipe fondatrice derri├¿re LogicMoov et notre vision d'un transport plus fiable au Qu├⌐bec.",
+      "D├⌐couvrez l'├⌐quipe fondatrice derri├¿re Taxi LogicMoov et notre vision d'un transport plus fiable au Qu├⌐bec.",
     values: [
       { title: "Fiabilit├⌐", description: "Ponctualit├⌐ et service constant ├á chaque course." },
       { title: "Transparence", description: "Des prix fixes clairs, sans frais cach├⌐s." },
@@ -312,8 +312,8 @@ const fr = {
     ],
     registeredTitle: "Entreprise enregistr├⌐e",
     registeredText:
-      "LogicMoov est une entreprise enregistr├⌐e provincialement au Qu├⌐bec, Canada ΓÇö NEQ 2282359860.",
-    detailsTitle: "LogicMoov en bref",
+      "Taxi LogicMoov est une entreprise enregistr├⌐e provincialement au Qu├⌐bec, Canada ΓÇö NEQ 2282359860.",
+    detailsTitle: "Taxi LogicMoov en bref",
     details: [
       { label: "Num├⌐ro d'entreprise du Qu├⌐bec (NEQ)", value: "2282359860" },
       { label: "En activit├⌐ depuis", value: "2026" },
@@ -365,7 +365,7 @@ const fr = {
   cancellationPolicy: {
     title: "Politique d'annulation",
     lead:
-      "Politique d'annulation des transferts aéroport LogicMoov. Nous comprenons que les plans peuvent changer. Voici comment fonctionnent les annulations pour les réservations de transfert aéroport LogicMoov.",
+      "Politique d'annulation des transferts aéroport Taxi LogicMoov. Nous comprenons que les plans peuvent changer. Voici comment fonctionnent les annulations pour les réservations de transfert aéroport Taxi LogicMoov.",
     items: [
       {
         title: "1. Annulation gratuite",
@@ -380,7 +380,7 @@ const fr = {
       {
         title: "3. Politique en cas de non-présentation (No-Show)",
         description:
-          "Une réservation sera considérée comme une absence du passager (No-Show) si le passager ne se présente pas au lieu de prise en charge convenu pendant le délai d'attente gratuit, ne peut pas être joint au numéro de téléphone fourni lors de la réservation, ou quitte le lieu de prise en charge sans en informer LogicMoov. Les réservations en cas de non-présentation ne sont pas remboursables.",
+          "Une réservation sera considérée comme une absence du passager (No-Show) si le passager ne se présente pas au lieu de prise en charge convenu pendant le délai d'attente gratuit, ne peut pas être joint au numéro de téléphone fourni lors de la réservation, ou quitte le lieu de prise en charge sans en informer Taxi LogicMoov. Les réservations en cas de non-présentation ne sont pas remboursables.",
       },
       {
         title: "4. Temps d'attente gratuit",
@@ -390,17 +390,17 @@ const fr = {
       {
         title: "5. Retards de vol",
         description:
-          "Pour les prises en charge à l'aéroport, LogicMoov surveille les arrivées des vols. En cas de retard, l'heure de prise en charge du chauffeur sera ajustée dans la mesure du possible. Aucun frais supplémentaire ne sera appliqué pour le retard du vol lui-même.",
+          "Pour les prises en charge à l'aéroport, Taxi LogicMoov surveille les arrivées des vols. En cas de retard, l'heure de prise en charge du chauffeur sera ajustée dans la mesure du possible. Aucun frais supplémentaire ne sera appliqué pour le retard du vol lui-même.",
       },
       {
         title: "6. Annulation de vol",
         description:
-          "Si un vol est annulé, les clients doivent informer LogicMoov dès que possible. Si l'annulation intervient plus de 24 heures avant l'heure prévue de prise en charge, un remboursement complet sera effectué. Dans le cas contraire, la politique d'annulation standard s'applique.",
+          "Si un vol est annulé, les clients doivent informer Taxi LogicMoov dès que possible. Si l'annulation intervient plus de 24 heures avant l'heure prévue de prise en charge, un remboursement complet sera effectué. Dans le cas contraire, la politique d'annulation standard s'applique.",
       },
       {
         title: "7. Retard du chauffeur",
         description:
-          "Si LogicMoov ne peut pas fournir le service réservé en raison de problèmes opérationnels, le client recevra au choix un remboursement complet ou un véhicule de remplacement sans frais supplémentaires, sous réserve de disponibilité.",
+          "Si Taxi LogicMoov ne peut pas fournir le service réservé en raison de problèmes opérationnels, le client recevra au choix un remboursement complet ou un véhicule de remplacement sans frais supplémentaires, sous réserve de disponibilité.",
       },
       {
         title: "8. Modification de réservation",
@@ -415,7 +415,7 @@ const fr = {
       {
         title: "10. Force majeure",
         description:
-          "LogicMoov n'est pas responsable des retards ou interruptions de service causés par des circonstances indépendantes de sa volonté, notamment les conditions météorologiques extrêmes, fermetures de routes, catastrophes naturelles, mesures gouvernementales ou incidents majeurs de circulation. Les demandes de remboursement liées à ces situations seront évaluées au cas par cas.",
+          "Taxi LogicMoov n'est pas responsable des retards ou interruptions de service causés par des circonstances indépendantes de sa volonté, notamment les conditions météorologiques extrêmes, fermetures de routes, catastrophes naturelles, mesures gouvernementales ou incidents majeurs de circulation. Les demandes de remboursement liées à ces situations seront évaluées au cas par cas.",
       },
       {
         title: "11. Heures d'exploitation",
@@ -429,9 +429,105 @@ const fr = {
       {
         title: "13. Instructions de rendez-vous à l'aéroport",
         description:
-          "Après avoir récupéré vos bagages, veuillez vous rendre à la zone de prise en charge désignée pour votre terminal.\n\n- Votre chauffeur suivra votre vol et ajustera l'heure de prise en charge si votre vol arrive en avance ou en retard.\n- Le temps d'attente gratuit de 60 minutes commence à partir de l'heure réelle d'atterrissage du vol.\n- Votre chauffeur vous contactera par téléphone, SMS ou WhatsApp en utilisant les coordonnées fournies lors de la réservation.\n- Veuillez garder votre téléphone mobile allumé après l'atterrissage.\n- Si vous ne parvenez pas à localiser votre chauffeur, contactez immédiatement le service client LogicMoov en utilisant le numéro de téléphone indiqué dans votre confirmation de réservation.\n- Pour les prises en charge à l'aéroport nécessitant un service d'accueil personnalisé, votre chauffeur vous attendra dans le hall des arrivées avec une pancarte affichant le nom du passager principal (lorsque ce service a été sélectionné).\n- Si vous rencontrez des retards liés à l'immigration ou à la récupération des bagages, veuillez en informer LogicMoov dès que possible afin de nous aider à coordonner votre prise en charge.\n- Un temps d'attente supplémentaire au-delà de la période gratuite peut entraîner des frais additionnels.\n\nMerci d'avoir choisi LogicMoov. Nous avons hâte de vous offrir un transfert aéroport sûr, fiable et confortable.",
+          "Après avoir récupéré vos bagages, veuillez vous rendre à la zone de prise en charge désignée pour votre terminal.\n\n- Votre chauffeur suivra votre vol et ajustera l'heure de prise en charge si votre vol arrive en avance ou en retard.\n- Le temps d'attente gratuit de 60 minutes commence à partir de l'heure réelle d'atterrissage du vol.\n- Votre chauffeur vous contactera par téléphone, SMS ou WhatsApp en utilisant les coordonnées fournies lors de la réservation.\n- Veuillez garder votre téléphone mobile allumé après l'atterrissage.\n- Si vous ne parvenez pas à localiser votre chauffeur, contactez immédiatement le service client Taxi LogicMoov en utilisant le numéro de téléphone indiqué dans votre confirmation de réservation.\n- Pour les prises en charge à l'aéroport nécessitant un service d'accueil personnalisé, votre chauffeur vous attendra dans le hall des arrivées avec une pancarte affichant le nom du passager principal (lorsque ce service a été sélectionné).\n- Si vous rencontrez des retards liés à l'immigration ou à la récupération des bagages, veuillez en informer Taxi LogicMoov dès que possible afin de nous aider à coordonner votre prise en charge.\n- Un temps d'attente supplémentaire au-delà de la période gratuite peut entraîner des frais additionnels.\n\nMerci d'avoir choisi Taxi LogicMoov. Nous avons hâte de vous offrir un transfert aéroport sûr, fiable et confortable.",
       },
     ],
+    yulFixedTariff: {
+      title: "Taxi LogicMoov — YUL Fixed Tariff",
+      subtitle: "All prices CAD, one-way, tax-inclusive customer pricing.",
+      columns: {
+        destination: "Destination",
+        standard: "Standard",
+        suv: "SUV",
+        van7: "Van 7",
+        van89: "Van 8/9",
+        premium: "Premium",
+      },
+      rows: [
+        { destination: "Downtown Montreal", standard: "$49.45", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Old Montreal", standard: "$49.45", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Griffintown", standard: "$52", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Golden Square Mile", standard: "$52", suv: "$94", van7: "$124", van89: "$134", premium: "$149" },
+        { destination: "International District", standard: "$52", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Quartier Latin", standard: "$52", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Milton Parc", standard: "$52", suv: "$94", van7: "$124", van89: "$134", premium: "$149" },
+        { destination: "Plateau-Mont-Royal", standard: "$55", suv: "$99", van7: "$129", van89: "$139", premium: "$154" },
+        { destination: "Mile End", standard: "$55", suv: "$99", van7: "$129", van89: "$139", premium: "$154" },
+        { destination: "Westmount", standard: "$55", suv: "$99", van7: "$129", van89: "$139", premium: "$154" },
+        { destination: "NDG", standard: "$60", suv: "$104", van7: "$134", van89: "$144", premium: "$159" },
+        { destination: "Côte-des-Neiges", standard: "$60", suv: "$104", van7: "$134", van89: "$144", premium: "$159" },
+        { destination: "Montreal East", standard: "$65", suv: "$109", van7: "$139", van89: "$149", premium: "$164" },
+        { destination: "Lachine", standard: "$65", suv: "$109", van7: "$139", van89: "$149", premium: "$164" },
+        { destination: "Pointe-Claire", standard: "$75", suv: "$119", van7: "$149", van89: "$159", premium: "$174" },
+        { destination: "Pointe-Claire Village", standard: "$75", suv: "$119", van7: "$149", van89: "$159", premium: "$174" },
+        { destination: "Dorval", standard: "$60", suv: "$104", van7: "$134", van89: "$144", premium: "$159" },
+        { destination: "Laval", standard: "$80", suv: "$109", van7: "$139", van89: "$149", premium: "$164" },
+        { destination: "Longueuil", standard: "$85", suv: "$115", van7: "$145", van89: "$155", premium: "$169" },
+        { destination: "Brossard", standard: "$95", suv: "$125", van7: "$155", van89: "$165", premium: "$179" },
+        { destination: "Saint-Lambert", standard: "$90", suv: "$119", van7: "$149", van89: "$159", premium: "$174" },
+        { destination: "West Island", standard: "$85", suv: "$129", van7: "$159", van89: "$169", premium: "$184" },
+        { destination: "Vaudreuil-Dorion", standard: "$105", suv: "$139", van7: "$169", van89: "$179", premium: "$199" },
+        { destination: "Mirabel", standard: "$125", suv: "$159", van7: "$189", van89: "$199", premium: "$219" },
+        { destination: "Saint-Jérôme", standard: "$145", suv: "$179", van7: "$209", van89: "$219", premium: "$239" },
+        { destination: "Mont-Tremblant", standard: "$350", suv: "$399", van7: "$449", van89: "$469", premium: "$499" },
+        { destination: "Quebec City", standard: "$395", suv: "$449", van7: "$499", van89: "$529", premium: "$575" },
+        { destination: "Ottawa", standard: "$425", suv: "$479", van7: "$529", van89: "$559", premium: "$599" },
+      ],
+      extrasTitle: "Extras & Add-ons",
+      extras: [
+        "Child seat: $15 / seat",
+        "Infant seat: $20 / seat",
+        "Booster seat: $15 / seat",
+        "Meet & Greet: $15",
+        "Additional stop: $15",
+        "Additional stop — >10 km: $25",
+        "Extra waiting — Standard: $15 / 15 min",
+        "Extra waiting — SUV: $20 / 15 min",
+        "Extra waiting — Van: $25 / 15 min",
+        "Extra waiting — Premium: $25 / 15 min",
+        "Oversized luggage: $20+",
+        "Additional vehicle: Quoted",
+      ],
+      airportWaitingTitle: "Airport waiting time",
+      airportWaiting: {
+        pickup: "Airport pickup: 60 minutes complimentary after flight landing.",
+        after: "After that:",
+        rows: [
+          { vehicle: "Standard", price: "$15 / 15 min" },
+          { vehicle: "SUV", price: "$20 / 15 min" },
+          { vehicle: "Van 7", price: "$25 / 15 min" },
+          { vehicle: "Van 8/9", price: "$25 / 15 min" },
+          { vehicle: "Premium", price: "$25 / 15 min" },
+        ],
+      },
+      hotelPickupTitle: "Hotel/residence pickup",
+      hotelPickup: {
+        lead: "15 minutes complimentary.",
+        details: [
+          "$15 per additional 15 minutes",
+          "For Van/Premium: $20–25 per additional 15 minutes",
+        ],
+      },
+      extraStopsTitle: "Extra stop",
+      extraStops: [
+        "First additional stop: $15",
+        "Second additional stop: $15",
+        "Stop requiring >10 km detour: $25",
+        "Major route deviation: Quote required",
+      ],
+      nightSurchargeTitle: "Night surcharge",
+      nightSurcharge: {
+        lead: "Taxi LogicMoov surcharge: 11:00 PM – 5:00 AM",
+        rows: [
+          { vehicle: "Standard", price: "+$7" },
+          { vehicle: "SUV", price: "+$10" },
+          { vehicle: "Van 7", price: "+$10" },
+          { vehicle: "Van 8/9", price: "+$15" },
+          { vehicle: "Premium", price: "+$15" },
+        ],
+      },
+      tollPolicy: "Toll policy: Tolls are applied as incurred and billed in accordance with the booked route.",
+    },
     fareDetails: {
       title: "Détails des tarifs - Trajet aller simple",
       destinationZone: "Zone de destination",
@@ -464,7 +560,7 @@ const fr = {
   },
   chat: {
     launcher: "Aide",
-    title: "Assistance LogicMoov",
+    title: "Assistance Taxi LogicMoov",
     subtitleBot: "Assistant virtuel ┬╖ r├⌐ponses instantan├⌐es",
     subtitleWaiting: "Mise en relation avec un agentΓÇª",
     subtitleAgent: "Vous discutez avec un agent",
@@ -492,7 +588,7 @@ const fr = {
 
 const en: Dictionary = {
   brand: {
-    name: "LogicMoov",
+    name: "Taxi LogicMoov",
     tagline: "Modern taxi transportation in Quebec",
   },
   nav: {
@@ -628,7 +724,7 @@ const en: Dictionary = {
     ],
   },
   features: {
-    title: "Why choose LogicMoov",
+    title: "Why choose Taxi LogicMoov",
     subtitle:
       "A modern platform built for reliability and peace of mind.",
     items: [
@@ -781,17 +877,17 @@ const en: Dictionary = {
       "This is a demo. No real payment is processed and no driver is actually dispatched.",
   },
   about: {
-    title: "About LogicMoov",
+    title: "About Taxi LogicMoov",
     lead: "We're modernizing taxi transportation in Quebec with reliable technology and human service.",
     body: [
-      "LogicMoov was born from a simple idea: make taxi travel transparent, punctual and accessible everywhere in the province. No more unpredictable fares or uncertain waiting.",
+      "Taxi LogicMoov was born from a simple idea: make taxi travel transparent, punctual and accessible everywhere in the province. No more unpredictable fares or uncertain waiting.",
       "Our platform connects travellers to a network of verified professional drivers, with fixed prices announced up front and real-time tracking of every ride.",
       "From airport transfers to business travel, our mission is to get you to your destination with confidence ΓÇö in French and in English.",
     ],
     valuesTitle: "Our values",
     foundersTitle: "Meet the founders",
     foundersSubtitle:
-      "Discover the founding team behind LogicMoov and our vision for more reliable transportation across Quebec.",
+      "Discover the founding team behind Taxi LogicMoov and our vision for more reliable transportation across Quebec.",
     values: [
       { title: "Reliability", description: "Punctuality and consistent service on every ride." },
       { title: "Transparency", description: "Clear fixed prices with no hidden fees." },
@@ -800,8 +896,8 @@ const en: Dictionary = {
     ],
     registeredTitle: "Registered business",
     registeredText:
-      "LogicMoov is a provincially registered business in Qu├⌐bec, Canada ΓÇö NEQ 2282359860.",
-    detailsTitle: "LogicMoov at a glance",
+      "Taxi LogicMoov is a provincially registered business in Qu├⌐bec, Canada ΓÇö NEQ 2282359860.",
+    detailsTitle: "Taxi LogicMoov at a glance",
     details: [
       { label: "Qu├⌐bec business number (NEQ)", value: "2282359860" },
       { label: "In business since", value: "2026" },
@@ -852,7 +948,7 @@ const en: Dictionary = {
   cancellationPolicy: {
     title: "Cancellation Policy",
     lead:
-      "LogicMoov Airport Transfer Cancellation Policy. We understand plans can change. Here's how cancellations work for our airport transfer bookings.",
+      "Taxi LogicMoov Airport Transfer Cancellation Policy. We understand plans can change. Here's how cancellations work for our airport transfer bookings.",
     items: [
       {
         title: "1. Free Cancellation",
@@ -867,7 +963,7 @@ const en: Dictionary = {
       {
         title: "3. No-Show Policy",
         description:
-          "A booking is considered a No-Show if the passenger does not arrive at the agreed pickup location within the complimentary waiting time, cannot be contacted using the provided phone number, or leaves the pickup location without informing LogicMoov. No-Shows are non-refundable.",
+          "A booking is considered a No-Show if the passenger does not arrive at the agreed pickup location within the complimentary waiting time, cannot be contacted using the provided phone number, or leaves the pickup location without informing Taxi LogicMoov. No-Shows are non-refundable.",
       },
       {
         title: "4. Complimentary Waiting Time",
@@ -877,17 +973,17 @@ const en: Dictionary = {
       {
         title: "5. Flight Delays",
         description:
-          "For airport pickups, LogicMoov monitors flight arrivals. If a flight is delayed, the driver's pickup time will be adjusted whenever operationally possible, and no additional charge will apply for the delay itself.",
+          "For airport pickups, Taxi LogicMoov monitors flight arrivals. If a flight is delayed, the driver's pickup time will be adjusted whenever operationally possible, and no additional charge will apply for the delay itself.",
       },
       {
         title: "6. Flight Cancellations",
         description:
-          "Customers must notify LogicMoov as soon as possible if a flight is cancelled. If cancellation occurs more than 24 hours before the scheduled pickup, a full refund will be issued. Otherwise, the standard cancellation policy applies.",
+          "Customers must notify Taxi LogicMoov as soon as possible if a flight is cancelled. If cancellation occurs more than 24 hours before the scheduled pickup, a full refund will be issued. Otherwise, the standard cancellation policy applies.",
       },
       {
         title: "7. Driver Delays",
         description:
-          "If LogicMoov is unable to provide the booked service due to operational issues, customers will receive either a full refund or an alternative vehicle at no additional cost, subject to availability.",
+          "If Taxi LogicMoov is unable to provide the booked service due to operational issues, customers will receive either a full refund or an alternative vehicle at no additional cost, subject to availability.",
       },
       {
         title: "8. Booking Modifications",
@@ -902,7 +998,7 @@ const en: Dictionary = {
       {
         title: "10. Force Majeure",
         description:
-          "LogicMoov is not liable for delays or service interruptions caused by circumstances beyond its reasonable control, including severe weather, road closures, natural disasters, government actions, or major traffic incidents. Refunds in these situations will be assessed on a case-by-case basis.",
+          "Taxi LogicMoov is not liable for delays or service interruptions caused by circumstances beyond its reasonable control, including severe weather, road closures, natural disasters, government actions, or major traffic incidents. Refunds in these situations will be assessed on a case-by-case basis.",
       },
       {
         title: "11. Operating Hours",
@@ -916,9 +1012,105 @@ const en: Dictionary = {
       {
         title: "13. Airport Meeting Instructions",
         description:
-          "After collecting your luggage, please proceed to the designated pickup area for your terminal.\n\n- Your driver will monitor your flight and adjust the pickup time if your flight arrives early or is delayed.\n- Complimentary waiting time of 60 minutes begins from the actual flight landing time.\n- Your driver will contact you via phone, SMS, or WhatsApp using the contact details provided in your booking.\n- Please keep your mobile phone switched on after landing.\n- If you are unable to locate your driver, contact LogicMoov Customer Support immediately using the phone number provided in your booking confirmation.\n- For airport pickups requiring a meet-and-greet service, your driver will wait in the arrivals hall with a sign displaying the lead passenger's name (where this service has been selected).\n- If you experience delays with immigration or baggage claim, please notify LogicMoov as soon as possible to help us coordinate your pickup.\n- Additional waiting time beyond the complimentary period may incur extra charges.\n\nThank you for choosing LogicMoov. We look forward to providing you with a safe, reliable, and comfortable airport transfer.",
+          "After collecting your luggage, please proceed to the designated pickup area for your terminal.\n\n- Your driver will monitor your flight and adjust the pickup time if your flight arrives early or is delayed.\n- Complimentary waiting time of 60 minutes begins from the actual flight landing time.\n- Your driver will contact you via phone, SMS, or WhatsApp using the contact details provided in your booking.\n- Please keep your mobile phone switched on after landing.\n- If you are unable to locate your driver, contact Taxi LogicMoov Customer Support immediately using the phone number provided in your booking confirmation.\n- For airport pickups requiring a meet-and-greet service, your driver will wait in the arrivals hall with a sign displaying the lead passenger's name (where this service has been selected).\n- If you experience delays with immigration or baggage claim, please notify Taxi LogicMoov as soon as possible to help us coordinate your pickup.\n- Additional waiting time beyond the complimentary period may incur extra charges.\n\nThank you for choosing Taxi LogicMoov. We look forward to providing you with a safe, reliable, and comfortable airport transfer.",
       },
     ],
+    yulFixedTariff: {
+      title: "Taxi LogicMoov — YUL Fixed Tariff",
+      subtitle: "All prices CAD, one-way, tax-inclusive customer pricing.",
+      columns: {
+        destination: "Destination",
+        standard: "Standard",
+        suv: "SUV",
+        van7: "Van 7",
+        van89: "Van 8/9",
+        premium: "Premium",
+      },
+      rows: [
+        { destination: "Downtown Montreal", standard: "$49.45", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Old Montreal", standard: "$49.45", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Griffintown", standard: "$52", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Golden Square Mile", standard: "$52", suv: "$94", van7: "$124", van89: "$134", premium: "$149" },
+        { destination: "International District", standard: "$52", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Quartier Latin", standard: "$52", suv: "$89", van7: "$119", van89: "$129", premium: "$139" },
+        { destination: "Milton Parc", standard: "$52", suv: "$94", van7: "$124", van89: "$134", premium: "$149" },
+        { destination: "Plateau-Mont-Royal", standard: "$55", suv: "$99", van7: "$129", van89: "$139", premium: "$154" },
+        { destination: "Mile End", standard: "$55", suv: "$99", van7: "$129", van89: "$139", premium: "$154" },
+        { destination: "Westmount", standard: "$55", suv: "$99", van7: "$129", van89: "$139", premium: "$154" },
+        { destination: "NDG", standard: "$60", suv: "$104", van7: "$134", van89: "$144", premium: "$159" },
+        { destination: "Côte-des-Neiges", standard: "$60", suv: "$104", van7: "$134", van89: "$144", premium: "$159" },
+        { destination: "Montreal East", standard: "$65", suv: "$109", van7: "$139", van89: "$149", premium: "$164" },
+        { destination: "Lachine", standard: "$65", suv: "$109", van7: "$139", van89: "$149", premium: "$164" },
+        { destination: "Pointe-Claire", standard: "$75", suv: "$119", van7: "$149", van89: "$159", premium: "$174" },
+        { destination: "Pointe-Claire Village", standard: "$75", suv: "$119", van7: "$149", van89: "$159", premium: "$174" },
+        { destination: "Dorval", standard: "$60", suv: "$104", van7: "$134", van89: "$144", premium: "$159" },
+        { destination: "Laval", standard: "$80", suv: "$109", van7: "$139", van89: "$149", premium: "$164" },
+        { destination: "Longueuil", standard: "$85", suv: "$115", van7: "$145", van89: "$155", premium: "$169" },
+        { destination: "Brossard", standard: "$95", suv: "$125", van7: "$155", van89: "$165", premium: "$179" },
+        { destination: "Saint-Lambert", standard: "$90", suv: "$119", van7: "$149", van89: "$159", premium: "$174" },
+        { destination: "West Island", standard: "$85", suv: "$129", van7: "$159", van89: "$169", premium: "$184" },
+        { destination: "Vaudreuil-Dorion", standard: "$105", suv: "$139", van7: "$169", van89: "$179", premium: "$199" },
+        { destination: "Mirabel", standard: "$125", suv: "$159", van7: "$189", van89: "$199", premium: "$219" },
+        { destination: "Saint-Jérôme", standard: "$145", suv: "$179", van7: "$209", van89: "$219", premium: "$239" },
+        { destination: "Mont-Tremblant", standard: "$350", suv: "$399", van7: "$449", van89: "$469", premium: "$499" },
+        { destination: "Quebec City", standard: "$395", suv: "$449", van7: "$499", van89: "$529", premium: "$575" },
+        { destination: "Ottawa", standard: "$425", suv: "$479", van7: "$529", van89: "$559", premium: "$599" },
+      ],
+      extrasTitle: "Extras & Add-ons",
+      extras: [
+        "Child seat: $15 / seat",
+        "Infant seat: $20 / seat",
+        "Booster seat: $15 / seat",
+        "Meet & Greet: $15",
+        "Additional stop: $15",
+        "Additional stop — >10 km: $25",
+        "Extra waiting — Standard: $15 / 15 min",
+        "Extra waiting — SUV: $20 / 15 min",
+        "Extra waiting — Van: $25 / 15 min",
+        "Extra waiting — Premium: $25 / 15 min",
+        "Oversized luggage: $20+",
+        "Additional vehicle: Quoted",
+      ],
+      airportWaitingTitle: "Airport waiting time",
+      airportWaiting: {
+        pickup: "Airport pickup: 60 minutes complimentary after flight landing.",
+        after: "After that:",
+        rows: [
+          { vehicle: "Standard", price: "$15 / 15 min" },
+          { vehicle: "SUV", price: "$20 / 15 min" },
+          { vehicle: "Van 7", price: "$25 / 15 min" },
+          { vehicle: "Van 8/9", price: "$25 / 15 min" },
+          { vehicle: "Premium", price: "$25 / 15 min" },
+        ],
+      },
+      hotelPickupTitle: "Hotel/residence pickup",
+      hotelPickup: {
+        lead: "15 minutes complimentary.",
+        details: [
+          "$15 per additional 15 minutes",
+          "For Van/Premium: $20–25 per additional 15 minutes",
+        ],
+      },
+      extraStopsTitle: "Extra stop",
+      extraStops: [
+        "First additional stop: $15",
+        "Second additional stop: $15",
+        "Stop requiring >10 km detour: $25",
+        "Major route deviation: Quote required",
+      ],
+      nightSurchargeTitle: "Night surcharge",
+      nightSurcharge: {
+        lead: "Taxi LogicMoov surcharge: 11:00 PM – 5:00 AM",
+        rows: [
+          { vehicle: "Standard", price: "+$7" },
+          { vehicle: "SUV", price: "+$10" },
+          { vehicle: "Van 7", price: "+$10" },
+          { vehicle: "Van 8/9", price: "+$15" },
+          { vehicle: "Premium", price: "+$15" },
+        ],
+      },
+      tollPolicy: "Toll policy: Tolls are applied as incurred and billed in accordance with the booked route.",
+    },
     fareDetails: {
       title: "Fare Details - One-Way Ride",
       destinationZone: "Destination Zone",
@@ -951,7 +1143,7 @@ const en: Dictionary = {
   },
   chat: {
     launcher: "Help",
-    title: "LogicMoov Support",
+    title: "Taxi LogicMoov Support",
     subtitleBot: "Virtual assistant ┬╖ instant answers",
     subtitleWaiting: "Connecting you to an agentΓÇª",
     subtitleAgent: "You're chatting with an agent",
@@ -982,3 +1174,4 @@ const dictionaries: Record<Locale, Dictionary> = { fr, en };
 export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale];
 }
+

@@ -22,8 +22,10 @@ export default function Footer({
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-ink-900">
                 <Car className="h-5 w-5" />
               </span>
-              <span className="text-lg font-extrabold tracking-tight text-white">
-                Logic<span className="text-brand-400">Moov</span>
+              <span className="text-lg font-extrabold tracking-tight">
+                <span className="text-white">Taxi</span>{" "}
+                <span className="text-white">Logic</span>
+                <span className="text-brand-400">Moov</span>
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-400">

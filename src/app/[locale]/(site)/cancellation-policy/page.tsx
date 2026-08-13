@@ -66,44 +66,144 @@ export default async function CancellationPolicyPage({
             })}
           </div>
 
-          <div className="mt-10 rounded-2xl border border-ink-100 bg-white p-6">
-            <h3 className="text-lg font-bold text-ink-900">
-              {dict.cancellationPolicy.fareDetails.title}
-            </h3>
-            <div className="mt-4 overflow-x-auto">
-              <table className="min-w-full border-collapse text-left text-sm">
-                <thead>
-                  <tr className="border-b border-ink-200 text-ink-700">
-                    <th className="px-3 py-2 font-semibold">
-                      {dict.cancellationPolicy.fareDetails.destinationZone}
-                    </th>
-                    <th className="px-3 py-2 font-semibold">
-                      {dict.cancellationPolicy.fareDetails.distance}
-                    </th>
-                    <th className="px-3 py-2 font-semibold">
-                      {dict.cancellationPolicy.fareDetails.suggestedFixedFare}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dict.cancellationPolicy.fareDetails.rows.map((row) => (
-                    <tr key={row.destination} className="border-b border-ink-100">
-                      <td className="px-3 py-2 text-ink-800">{row.destination}</td>
-                      <td className="px-3 py-2 text-ink-600">{row.distance}</td>
-                      <td className="px-3 py-2 font-medium text-ink-900">{row.fare}</td>
+          {dict.cancellationPolicy.yulFixedTariff ? (
+            <div className="mt-10 rounded-2xl border border-ink-100 bg-white p-6">
+              <h3 className="text-lg font-bold text-ink-900">{dict.cancellationPolicy.yulFixedTariff.title}</h3>
+              <p className="mt-2 text-sm text-ink-600">{dict.cancellationPolicy.yulFixedTariff.subtitle}</p>
+
+              <div className="mt-4 overflow-x-auto">
+                <table className="min-w-full border-collapse text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-ink-200 text-ink-700">
+                      <th className="px-3 py-2 font-semibold">{dict.cancellationPolicy.yulFixedTariff.columns.destination}</th>
+                      <th className="px-3 py-2 font-semibold">{dict.cancellationPolicy.yulFixedTariff.columns.standard}</th>
+                      <th className="px-3 py-2 font-semibold">{dict.cancellationPolicy.yulFixedTariff.columns.suv}</th>
+                      <th className="px-3 py-2 font-semibold">{dict.cancellationPolicy.yulFixedTariff.columns.van7}</th>
+                      <th className="px-3 py-2 font-semibold">{dict.cancellationPolicy.yulFixedTariff.columns.van89}</th>
+                      <th className="px-3 py-2 font-semibold">{dict.cancellationPolicy.yulFixedTariff.columns.premium}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {dict.cancellationPolicy.yulFixedTariff.rows.map((row) => (
+                      <tr key={row.destination} className="border-b border-ink-100 align-top">
+                        <td className="px-3 py-2 text-ink-800">{row.destination}</td>
+                        <td className="px-3 py-2 text-ink-700">{row.standard}</td>
+                        <td className="px-3 py-2 text-ink-700">{row.suv}</td>
+                        <td className="px-3 py-2 text-ink-700">{row.van7}</td>
+                        <td className="px-3 py-2 text-ink-700">{row.van89}</td>
+                        <td className="px-3 py-2 font-medium text-ink-900">{row.premium}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-8 grid gap-6 lg:grid-cols-2">
+                <div className="rounded-xl border border-ink-100 bg-ink-50 p-4">
+                  <h4 className="font-bold text-ink-900">{dict.cancellationPolicy.yulFixedTariff.extrasTitle}</h4>
+                  <ul className="mt-3 space-y-2 text-sm text-ink-700">
+                    {dict.cancellationPolicy.yulFixedTariff.extras.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="rounded-xl border border-ink-100 bg-ink-50 p-4">
+                  <h4 className="font-bold text-ink-900">{dict.cancellationPolicy.yulFixedTariff.airportWaitingTitle}</h4>
+                  <p className="mt-3 text-sm text-ink-700">{dict.cancellationPolicy.yulFixedTariff.airportWaiting.pickup}</p>
+                  <p className="mt-2 text-sm font-medium text-ink-800">{dict.cancellationPolicy.yulFixedTariff.airportWaiting.after}</p>
+                  <div className="mt-2 space-y-1 text-sm text-ink-700">
+                    {dict.cancellationPolicy.yulFixedTariff.airportWaiting.rows.map((row) => (
+                      <div key={row.vehicle} className="flex items-center justify-between gap-3">
+                        <span>{row.vehicle}</span>
+                        <span>{row.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-6 lg:grid-cols-2">
+                <div className="rounded-xl border border-ink-100 bg-ink-50 p-4">
+                  <h4 className="font-bold text-ink-900">{dict.cancellationPolicy.yulFixedTariff.hotelPickupTitle}</h4>
+                  <p className="mt-3 text-sm text-ink-700">{dict.cancellationPolicy.yulFixedTariff.hotelPickup.lead}</p>
+                  <ul className="mt-3 space-y-2 text-sm text-ink-700">
+                    {dict.cancellationPolicy.yulFixedTariff.hotelPickup.details.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="rounded-xl border border-ink-100 bg-ink-50 p-4">
+                  <h4 className="font-bold text-ink-900">{dict.cancellationPolicy.yulFixedTariff.extraStopsTitle}</h4>
+                  <ul className="mt-3 space-y-2 text-sm text-ink-700">
+                    {dict.cancellationPolicy.yulFixedTariff.extraStops.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-6 lg:grid-cols-2">
+                <div className="rounded-xl border border-ink-100 bg-ink-50 p-4">
+                  <h4 className="font-bold text-ink-900">{dict.cancellationPolicy.yulFixedTariff.nightSurchargeTitle}</h4>
+                  <p className="mt-3 text-sm text-ink-700">{dict.cancellationPolicy.yulFixedTariff.nightSurcharge.lead}</p>
+                  <div className="mt-3 space-y-1 text-sm text-ink-700">
+                    {dict.cancellationPolicy.yulFixedTariff.nightSurcharge.rows.map((row) => (
+                      <div key={row.vehicle} className="flex items-center justify-between gap-3">
+                        <span>{row.vehicle}</span>
+                        <span>{row.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-ink-100 bg-ink-50 p-4">
+                  <h4 className="font-bold text-ink-900">Toll policy</h4>
+                  <p className="mt-3 text-sm text-ink-700">{dict.cancellationPolicy.yulFixedTariff.tollPolicy}</p>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-10 rounded-2xl border border-ink-100 bg-white p-6">
+              <h3 className="text-lg font-bold text-ink-900">
+                {dict.cancellationPolicy.fareDetails.title}
+              </h3>
+              <div className="mt-4 overflow-x-auto">
+                <table className="min-w-full border-collapse text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-ink-200 text-ink-700">
+                      <th className="px-3 py-2 font-semibold">
+                        {dict.cancellationPolicy.fareDetails.destinationZone}
+                      </th>
+                      <th className="px-3 py-2 font-semibold">
+                        {dict.cancellationPolicy.fareDetails.distance}
+                      </th>
+                      <th className="px-3 py-2 font-semibold">
+                        {dict.cancellationPolicy.fareDetails.suggestedFixedFare}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dict.cancellationPolicy.fareDetails.rows.map((row) => (
+                      <tr key={row.destination} className="border-b border-ink-100">
+                        <td className="px-3 py-2 text-ink-800">{row.destination}</td>
+                        <td className="px-3 py-2 text-ink-600">{row.distance}</td>
+                        <td className="px-3 py-2 font-medium text-ink-900">{row.fare}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           <div className="mt-12 rounded-2xl bg-brand-50 border border-brand-200 p-8">
             <div className="flex gap-4">
               <PhoneCall className="h-6 w-6 shrink-0 text-brand-600 mt-1" />
               <div>
                 <h3 className="font-bold text-ink-900 mb-2">Need to cancel or modify your booking?</h3>
-                <p className="text-sm text-ink-700 mb-3">Contact us directly and we'll help you right away.</p>
+                <p className="text-sm text-ink-700 mb-3">Contact us directly and we&apos;ll help you right away.</p>
                 <div className="flex flex-col sm:flex-row gap-4 text-sm">
                   <a href="tel:+5142664708" className="font-semibold text-brand-600 hover:text-brand-700">
                     Call: +514-266-4708

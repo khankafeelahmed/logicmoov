@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -13,7 +13,7 @@ import {
   MessagesSquare,
   DollarSign,
 } from "lucide-react";
-import { clearSession, getToken, getUser, type AdminUser } from "@/lib/adminAuth";
+import { clearSession, getToken, getUser } from "@/lib/adminAuth";
 
 export default function AdminShell({
   locale,
@@ -26,26 +26,34 @@ export default function AdminShell({
   const router = useRouter();
   const base = `/${locale}/admin`;
   const isLoginPage = pathname === `${base}/login`;
-
-  const [checked, setChecked] = useState(false);
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const token = getToken();
+    setHydrated(true);
+  }, []);
+
+  const user = hydrated ? getUser() : null;
+  const token = hydrated ? getToken() : null;
+  const checked = isLoginPage || !!token;
+
+  useEffect(() => {
+    if (!hydrated) return;
     if (!token && !isLoginPage) {
       router.replace(`${base}/login`);
       return;
     }
-    setUser(getUser());
-    setChecked(true);
-  }, [base, isLoginPage, router]);
+
+    if (token && user && user.role !== "ADMIN" && !isLoginPage) {
+      router.replace(`/${locale}`);
+    }
+  }, [base, hydrated, isLoginPage, locale, router, token, user]);
 
   // The login page renders without the dashboard chrome.
   if (isLoginPage) {
     return <div className="min-h-screen bg-ink-50">{children}</div>;
   }
 
-  if (!checked) {
+  if (!hydrated || !checked) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-ink-50">
         <Loader2 className="h-6 w-6 animate-spin text-ink-400" />
@@ -74,7 +82,11 @@ export default function AdminShell({
             <Car className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-extrabold text-ink-900">LogicMoov</p>
+            <p className="text-sm font-extrabold tracking-tight">
+              <span className="text-ink-900">Taxi</span>{" "}
+              <span className="text-ink-900">Logic</span>
+              <span className="text-brand-500">Moov</span>
+            </p>
             <p className="text-xs text-ink-400">Admin</p>
           </div>
         </div>
@@ -117,7 +129,12 @@ export default function AdminShell({
 
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-ink-200 bg-white px-4 py-3 lg:hidden">
-          <span className="font-extrabold text-ink-900">LogicMoov Admin</span>
+          <span className="font-extrabold tracking-tight text-ink-900">
+            <span className="text-ink-900">Taxi</span>{" "}
+            <span className="text-ink-900">Logic</span>
+            <span className="text-brand-500">Moov</span>
+            <span className="ml-1 text-ink-500">Admin</span>
+          </span>
           <button type="button" onClick={logout} className="text-sm text-ink-500">
             Sign out
           </button>
@@ -138,3 +155,4 @@ export default function AdminShell({
     </div>
   );
 }
+

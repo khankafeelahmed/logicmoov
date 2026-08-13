@@ -24,8 +24,8 @@ export default function AdminLoginPage({
     setError(null);
     try {
       const result = await api.login(email, password);
-      if (result.user.role !== "ADMIN" && result.user.role !== "AGENT") {
-        setError("This account does not have admin access.");
+      if (result.user.role !== "ADMIN") {
+        setError("Only the admin account can access the admin dashboard.");
         return;
       }
       setSession(result);
@@ -49,7 +49,11 @@ export default function AdminLoginPage({
             <Car className="h-5 w-5" />
           </span>
           <div>
-            <p className="font-extrabold text-ink-900">LogicMoov</p>
+            <p className="font-extrabold tracking-tight">
+              <span className="text-ink-900">Taxi</span>{" "}
+              <span className="text-ink-900">Logic</span>
+              <span className="text-brand-500">Moov</span>
+            </p>
             <p className="text-xs text-ink-400">Admin sign in</p>
           </div>
         </div>

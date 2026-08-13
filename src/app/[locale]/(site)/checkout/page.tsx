@@ -25,28 +25,46 @@ export default function CheckoutPage() {
   useEffect(() => {
     let cancelled = false;
     setPaymentError(null);
-    fetch('/api/create-payment-intent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fareAmount }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
+    (async () => {
+      try {
+        const res = await fetch('/api/create-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ fareAmount }),
+          cache: 'no-store',
+        });
+
+        const contentType = res.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        const payloadText = await res.text();
+        const payload = isJson ? JSON.parse(payloadText) : null;
+
         if (!res.ok) {
-          throw new Error(data.error || 'Could not initialize payment.');
+          const message =
+            (payload && typeof payload.error === 'string' && payload.error) ||
+            'Could not initialize payment. Please try again.';
+          throw new Error(message);
         }
-        return data;
-      })
-      .then((data) => {
-        if (!cancelled) setClientSecret(data.clientSecret);
-      })
-      .catch((err) => {
+
+        const clientSecret =
+          payload && typeof payload.clientSecret === 'string'
+            ? payload.clientSecret
+            : null;
+        if (!clientSecret) {
+          throw new Error('Payment service returned an invalid response.');
+        }
+
+        if (!cancelled) setClientSecret(clientSecret);
+      } catch (err) {
         if (!cancelled) {
           setPaymentError(
-            err instanceof Error ? err.message : 'Could not initialize payment.',
+            err instanceof Error
+              ? err.message
+              : 'Could not initialize payment. Please try again.',
           );
         }
-      });
+      }
+    })();
 
     return () => {
       cancelled = true;
