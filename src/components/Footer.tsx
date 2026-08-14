@@ -109,7 +109,9 @@ export default function Footer({
             <Link href={`${base}/privacy-policy`} className="hover:text-ink-300">
               {dict.footer.privacy}
             </Link>
-            <span className="hover:text-ink-300">{dict.footer.terms}</span>
+            <Link href={`${base}/terms-of-use`} className="hover:text-ink-300">
+              {dict.footer.terms}
+            </Link>
             <span className="hover:text-ink-300">{dict.footer.accessibility}</span>
             <Link
               href={`${base}/cancellation-policy`}
