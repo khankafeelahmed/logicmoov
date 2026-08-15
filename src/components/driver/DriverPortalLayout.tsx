@@ -16,7 +16,7 @@ const items = [
   { id: "dashboard", label: "Dashboard", href: "/driver/dashboard" },
   { id: "profile", label: "Profile", href: "/driver/profile" },
   { id: "vehicle", label: "Vehicle", href: "/driver/vehicle" },
-  { id: "documents", label: "Documents", href: "/driver/documents" },
+  { id: "documents", label: "Documents & Compliance", href: "/driver/documents" },
   { id: "application", label: "Application", href: "/driver/application" },
   { id: "status", label: "Status", href: "/driver/status" },
 ] as const;
@@ -24,7 +24,7 @@ const items = [
 export default function DriverPortalLayout({ locale, active, title, subtitle, children }: DriverPortalLayoutProps) {
   const pathname = usePathname();
   const pathLocale = pathname?.split("/")[1] || locale;
-  const prefix = `/${pathLocale}/driver`;
+  const prefix = `/${pathLocale}`;
 
   return (
     <div className="min-h-screen bg-[#f3efe8] text-[#111827]">

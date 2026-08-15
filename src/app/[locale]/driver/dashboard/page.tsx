@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
+import { getDriverEligibilityStatus } from "@/lib/complianceDocuments";
 import { buildDriverStatusSummary, getCurrentDriverApplication } from "@/lib/driverOnboarding";
 
 const statusLabels = ["Draft", "Submitted", "Under Review", "Needs Information", "Approved", "Rejected", "Suspended"];
@@ -13,7 +14,7 @@ const dashboardCards = [
   { label: "Work Authorization", href: "/driver/profile" },
   { label: "Vehicle", href: "/driver/vehicle" },
   { label: "Insurance", href: "/driver/vehicle" },
-  { label: "Documents", href: "/driver/documents" },
+  { label: "Documents & Compliance", href: "/driver/documents" },
   { label: "Application", href: "/driver/application" },
 ];
 
@@ -22,6 +23,7 @@ export default function DriverDashboardPage() {
   const router = useRouter();
   const draft = useMemo(() => getCurrentDriverApplication(), []);
   const summary = buildDriverStatusSummary(draft);
+  const complianceSummary = useMemo(() => getDriverEligibilityStatus(draft?.email ?? ""), [draft?.email]);
   const firstName = draft?.firstName || "Driver";
 
   return (
@@ -42,6 +44,15 @@ export default function DriverDashboardPage() {
                   </span>
                 );
               })}
+            </div>
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-500">Booking eligibility</p>
+                <p className="mt-2 text-sm font-semibold text-slate-800">{complianceSummary.summary}</p>
+              </div>
+              <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${complianceSummary.eligible ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                {complianceSummary.eligible ? "Eligible" : "Blocked"}
+              </span>
             </div>
           </div>
         </div>
