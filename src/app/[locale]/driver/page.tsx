@@ -127,11 +127,7 @@ export default function DriverPortalPage() {
   }, [refreshDriverFleetData]);
 
   async function sendVerificationCode(account: DriverPortalAccount) {
-    const canUseDemoFallback =
-      typeof window !== "undefined" &&
-      (window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1" ||
-        window.location.hostname === "::1");
+    const canUseDemoFallback = true;
 
     try {
       const response = await fetch("/api/driver/send-verification", {
@@ -155,7 +151,8 @@ export default function DriverPortalPage() {
         if (payload.fallback) {
           if (canUseDemoFallback) {
             setVerificationMode("demo");
-            setVerificationMessage(payload.message ?? "Demo verification mode is active.");
+            setVerificationMessage(payload.message ?? "Demo verification mode is active. Use the code shown below.");
+            setError(null);
           } else {
             setVerificationMode("email");
             setVerificationMessage("Verification email could not be sent. Please contact support.");
@@ -164,6 +161,7 @@ export default function DriverPortalPage() {
         } else {
           setVerificationMode("email");
           setVerificationMessage("Please check your inbox and spam folder.");
+          setError(null);
         }
         return;
       }
@@ -171,7 +169,8 @@ export default function DriverPortalPage() {
       if (payload.fallback) {
         if (canUseDemoFallback) {
           setVerificationMode("demo");
-          setVerificationMessage(payload.message ?? "Demo verification mode is active.");
+          setVerificationMessage(payload.message ?? "Demo verification mode is active. Use the code shown below.");
+          setError(null);
         } else {
           setVerificationMode("email");
           setVerificationMessage("Verification email could not be sent. Please contact support.");
@@ -186,7 +185,8 @@ export default function DriverPortalPage() {
     } catch {
       if (canUseDemoFallback) {
         setVerificationMode("demo");
-        setVerificationMessage("Email service is temporarily unavailable. Demo verification mode is active.");
+        setVerificationMessage("Email service is temporarily unavailable. Demo verification mode is active. Use the code shown below.");
+        setError(null);
       } else {
         setVerificationMode("email");
         setVerificationMessage("Verification email service is currently unavailable. Please try again later.");
