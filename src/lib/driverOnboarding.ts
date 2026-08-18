@@ -218,9 +218,31 @@ export async function createDriverAccount(input: {
 
 export function getCurrentDriverApplication(): DriverApplicationDraft | null {
   if (typeof window === "undefined") return null;
-  const drafts = readDrafts();
-  if (drafts.length === 0) return null;
-  return drafts[drafts.length - 1];
+
+  const rawSession = window.localStorage.getItem("taxi_logicmoov_driver_session");
+  if (!rawSession) return null;
+
+  try {
+    const session = JSON.parse(rawSession) as { email?: string };
+    const email = String(session.email ?? "").trim().toLowerCase();
+    if (!email) {
+      window.localStorage.removeItem("taxi_logicmoov_driver_session");
+      return null;
+    }
+
+    const drafts = readDrafts();
+    const match = drafts.find((draft) => draft.email.toLowerCase() === email) ?? null;
+
+    if (!match) {
+      window.localStorage.removeItem("taxi_logicmoov_driver_session");
+      return null;
+    }
+
+    return match;
+  } catch {
+    window.localStorage.removeItem("taxi_logicmoov_driver_session");
+    return null;
+  }
 }
 
 export function getDriverApplicationByEmail(email: string): DriverApplicationDraft | null {

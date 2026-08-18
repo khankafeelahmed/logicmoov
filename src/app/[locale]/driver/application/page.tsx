@@ -1,20 +1,34 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
-import { canSubmitDriverApplication, getCurrentDriverApplication, saveDriverApplication } from "@/lib/driverOnboarding";
+import { canSubmitDriverApplication, getCurrentDriverApplication, saveDriverApplication, type DriverApplicationDraft } from "@/lib/driverOnboarding";
 
 export default function DriverApplicationPage() {
   const { locale } = useParams<{ locale: string }>();
-  const draft = useMemo(() => getCurrentDriverApplication(), []);
+  const [draft, setDraft] = useState<DriverApplicationDraft | null>(null);
+
+  useEffect(() => {
+    setDraft(getCurrentDriverApplication());
+  }, []);
+
   const checklist = canSubmitDriverApplication(draft);
   const [consents, setConsents] = useState({
-    terms: draft?.account?.termsAccepted ?? false,
-    privacy: draft?.account?.privacyAccepted ?? false,
+    terms: false,
+    privacy: false,
     verification: false,
     accuracy: false,
   });
+
+  useEffect(() => {
+    if (!draft) return;
+    setConsents((current) => ({
+      ...current,
+      terms: draft.account?.termsAccepted ?? false,
+      privacy: draft.account?.privacyAccepted ?? false,
+    }));
+  }, [draft]);
 
   const handleToggle = (key: keyof typeof consents) => {
     setConsents((current) => ({ ...current, [key]: !current[key] }));

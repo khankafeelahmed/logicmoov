@@ -1,14 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
 import { getDriverEligibilityStatus } from "@/lib/complianceDocuments";
-import { buildDriverStatusSummary, getCurrentDriverApplication } from "@/lib/driverOnboarding";
+import { buildDriverStatusSummary, getCurrentDriverApplication, type DriverApplicationDraft } from "@/lib/driverOnboarding";
 
 export default function DriverStatusPage() {
   const { locale } = useParams<{ locale: string }>();
-  const draft = useMemo(() => getCurrentDriverApplication(), []);
+  const [draft, setDraft] = useState<DriverApplicationDraft | null>(null);
+
+  useEffect(() => {
+    setDraft(getCurrentDriverApplication());
+  }, []);
+
   const summary = buildDriverStatusSummary(draft);
   const complianceSummary = useMemo(() => getDriverEligibilityStatus(draft?.email ?? ""), [draft?.email]);
 

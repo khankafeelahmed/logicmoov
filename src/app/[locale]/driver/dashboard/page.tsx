@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
 import { getDriverEligibilityStatus } from "@/lib/complianceDocuments";
-import { buildDriverStatusSummary, getCurrentDriverApplication } from "@/lib/driverOnboarding";
+import { buildDriverStatusSummary, getCurrentDriverApplication, type DriverApplicationDraft } from "@/lib/driverOnboarding";
 
 const statusLabels = ["Draft", "Submitted", "Under Review", "Needs Information", "Approved", "Rejected", "Suspended"];
 const dashboardCards = [
@@ -21,10 +21,33 @@ const dashboardCards = [
 export default function DriverDashboardPage() {
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
-  const draft = useMemo(() => getCurrentDriverApplication(), []);
+  const [draft, setDraft] = useState<DriverApplicationDraft | null>(null);
+
+  useEffect(() => {
+    setDraft(getCurrentDriverApplication());
+  }, []);
+
   const summary = buildDriverStatusSummary(draft);
   const complianceSummary = useMemo(() => getDriverEligibilityStatus(draft?.email ?? ""), [draft?.email]);
   const firstName = draft?.firstName || "Driver";
+
+  if (!draft) {
+    return (
+      <DriverPortalLayout locale={String(locale)} active="dashboard" title="Driver dashboard" subtitle="Review your application progress and continue where you left off.">
+        <div className="space-y-5 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-500">No saved record</p>
+            <h2 className="mt-3 text-2xl font-black tracking-[-0.05em] text-slate-800">No driver record found</h2>
+            <p className="mt-2 text-sm text-slate-600">There is no active driver profile or saved application for this portal session.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button type="button" onClick={() => router.push(`/${locale}/driver/register`)} className="rounded-xl bg-[#111827] px-4 py-2.5 text-sm font-bold text-white">Register</button>
+            <button type="button" onClick={() => router.push(`/${locale}/driver/login`)} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700">Login</button>
+          </div>
+        </div>
+      </DriverPortalLayout>
+    );
+  }
 
   return (
     <DriverPortalLayout locale={String(locale)} active="dashboard" title="Driver dashboard" subtitle="Review your application progress and continue where you left off.">

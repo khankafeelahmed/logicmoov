@@ -1,31 +1,58 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
-import { getCurrentDriverApplication, saveDriverApplication } from "@/lib/driverOnboarding";
+import { getCurrentDriverApplication, saveDriverApplication, type DriverApplicationDraft } from "@/lib/driverOnboarding";
 
 export default function DriverVehiclePage() {
   const { locale } = useParams<{ locale: string }>();
-  const draft = useMemo(() => getCurrentDriverApplication(), []);
+  const [draft, setDraft] = useState<DriverApplicationDraft | null>(null);
+
+  useEffect(() => {
+    setDraft(getCurrentDriverApplication());
+  }, []);
+
   const [form, setForm] = useState({
-    category: draft?.vehicle?.category ?? "SUV",
-    make: draft?.vehicle?.make ?? "",
-    model: draft?.vehicle?.model ?? "",
-    year: draft?.vehicle?.year ?? new Date().getFullYear().toString(),
-    colour: draft?.vehicle?.colour ?? "",
-    licencePlate: draft?.vehicle?.licencePlate ?? "",
-    province: draft?.vehicle?.province ?? "Quebec",
-    vin: draft?.vehicle?.vin ?? "",
-    passengerCapacity: draft?.vehicle?.passengerCapacity ?? "4",
-    luggageCapacity: draft?.vehicle?.luggageCapacity ?? "4",
-    registrationNumber: draft?.vehicle?.registrationNumber ?? "",
-    registrationExpiryDate: draft?.vehicle?.registrationExpiryDate ?? "",
-    permitInfo: draft?.vehicle?.permitInfo ?? "",
-    insuranceCompany: draft?.vehicle?.insuranceCompany ?? "",
-    policyNumber: draft?.vehicle?.policyNumber ?? "",
-    insuranceExpiryDate: draft?.vehicle?.insuranceExpiryDate ?? "",
+    category: "SUV",
+    make: "",
+    model: "",
+    year: new Date().getFullYear().toString(),
+    colour: "",
+    licencePlate: "",
+    province: "Quebec",
+    vin: "",
+    passengerCapacity: "4",
+    luggageCapacity: "4",
+    registrationNumber: "",
+    registrationExpiryDate: "",
+    permitInfo: "",
+    insuranceCompany: "",
+    policyNumber: "",
+    insuranceExpiryDate: "",
   });
+
+  useEffect(() => {
+    if (!draft) return;
+    setForm({
+      category: draft.vehicle?.category ?? "SUV",
+      make: draft.vehicle?.make ?? "",
+      model: draft.vehicle?.model ?? "",
+      year: draft.vehicle?.year ?? new Date().getFullYear().toString(),
+      colour: draft.vehicle?.colour ?? "",
+      licencePlate: draft.vehicle?.licencePlate ?? "",
+      province: draft.vehicle?.province ?? "Quebec",
+      vin: draft.vehicle?.vin ?? "",
+      passengerCapacity: draft.vehicle?.passengerCapacity ?? "4",
+      luggageCapacity: draft.vehicle?.luggageCapacity ?? "4",
+      registrationNumber: draft.vehicle?.registrationNumber ?? "",
+      registrationExpiryDate: draft.vehicle?.registrationExpiryDate ?? "",
+      permitInfo: draft.vehicle?.permitInfo ?? "",
+      insuranceCompany: draft.vehicle?.insuranceCompany ?? "",
+      policyNumber: draft.vehicle?.policyNumber ?? "",
+      insuranceExpiryDate: draft.vehicle?.insuranceExpiryDate ?? "",
+    });
+  }, [draft]);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();

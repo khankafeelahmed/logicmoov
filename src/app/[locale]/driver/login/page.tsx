@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
 import { getCurrentDriverApplication, signInDriverAccount } from "@/lib/driverOnboarding";
@@ -8,8 +8,15 @@ import { getCurrentDriverApplication, signInDriverAccount } from "@/lib/driverOn
 export default function DriverLoginPage() {
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
-  const [form, setForm] = useState({ email: getCurrentDriverApplication()?.email ?? "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const draft = getCurrentDriverApplication();
+    if (draft?.email) {
+      setForm((current) => ({ ...current, email: draft.email }));
+    }
+  }, []);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();

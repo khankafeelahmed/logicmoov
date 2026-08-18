@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
-import { createDriverAccount, getCurrentDriverApplication, saveDriverApplication, verifyDriverEmail } from "@/lib/driverOnboarding";
+import { createDriverAccount, getCurrentDriverApplication, saveDriverApplication, verifyDriverEmail, type DriverApplicationDraft } from "@/lib/driverOnboarding";
 
 const stepTitles = [
   "Create account",
@@ -20,62 +20,126 @@ export default function DriverRegisterPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<string | null>(null);
-  const [draft, setDraft] = useState(getCurrentDriverApplication());
+  const [draft, setDraft] = useState<DriverApplicationDraft | null>(null);
+
+  useEffect(() => {
+    setDraft(getCurrentDriverApplication());
+  }, []);
+
   const [accountForm, setAccountForm] = useState({
-    firstName: draft?.firstName ?? "",
-    lastName: draft?.lastName ?? "",
-    email: draft?.email ?? "",
-    mobilePhone: draft?.account?.mobilePhone ?? "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    mobilePhone: "",
     password: "",
-    preferredLanguage: draft?.account?.preferredLanguage ?? "English",
-    termsAccepted: draft?.account?.termsAccepted ?? false,
-    privacyAccepted: draft?.account?.privacyAccepted ?? false,
-    agreementAccepted: draft?.account?.agreementAccepted ?? false,
+    preferredLanguage: "English",
+    termsAccepted: false,
+    privacyAccepted: false,
+    agreementAccepted: false,
   });
   const [personalForm, setPersonalForm] = useState({
-    middleName: draft?.personal?.middleName ?? "",
-    preferredName: draft?.personal?.preferredName ?? "",
-    dateOfBirth: draft?.personal?.dateOfBirth ?? "",
-    alternatePhone: draft?.personal?.alternatePhone ?? "",
-    residentialAddress: draft?.personal?.residentialAddress ?? "",
-    city: draft?.personal?.city ?? "",
-    province: draft?.personal?.province ?? "",
-    postalCode: draft?.personal?.postalCode ?? "",
-    country: draft?.personal?.country ?? "Canada",
-    emergencyContactName: draft?.personal?.emergencyContactName ?? "",
-    emergencyContactPhone: draft?.personal?.emergencyContactPhone ?? "",
-    emergencyContactRelationship: draft?.personal?.emergencyContactRelationship ?? "",
+    middleName: "",
+    preferredName: "",
+    dateOfBirth: "",
+    alternatePhone: "",
+    residentialAddress: "",
+    city: "",
+    province: "",
+    postalCode: "",
+    country: "Canada",
+    emergencyContactName: "",
+    emergencyContactPhone: "",
+    emergencyContactRelationship: "",
   });
   const [workForm, setWorkForm] = useState({
-    status: draft?.workEligibility?.status ?? "Canadian Citizen",
-    documentType: draft?.workEligibility?.documentType ?? "Passport",
-    expiryDate: draft?.workEligibility?.expiryDate ?? "",
+    status: "Canadian Citizen",
+    documentType: "Passport",
+    expiryDate: "",
   });
   const [licenceForm, setLicenceForm] = useState({
-    licenceNumber: draft?.licence?.licenceNumber ?? "",
-    province: draft?.licence?.province ?? "Quebec",
-    licenceClass: draft?.licence?.licenceClass ?? "Class 5",
-    issueDate: draft?.licence?.issueDate ?? "",
-    expiryDate: draft?.licence?.expiryDate ?? "",
+    licenceNumber: "",
+    province: "Quebec",
+    licenceClass: "Class 5",
+    issueDate: "",
+    expiryDate: "",
   });
   const [vehicleForm, setVehicleForm] = useState({
-    category: draft?.vehicle?.category ?? "SUV",
-    make: draft?.vehicle?.make ?? "",
-    model: draft?.vehicle?.model ?? "",
-    year: draft?.vehicle?.year ?? new Date().getFullYear().toString(),
-    colour: draft?.vehicle?.colour ?? "",
-    licencePlate: draft?.vehicle?.licencePlate ?? "",
-    province: draft?.vehicle?.province ?? "Quebec",
-    vin: draft?.vehicle?.vin ?? "",
-    passengerCapacity: draft?.vehicle?.passengerCapacity ?? "4",
-    luggageCapacity: draft?.vehicle?.luggageCapacity ?? "4",
-    registrationNumber: draft?.vehicle?.registrationNumber ?? "",
-    registrationExpiryDate: draft?.vehicle?.registrationExpiryDate ?? "",
-    permitInfo: draft?.vehicle?.permitInfo ?? "",
-    insuranceCompany: draft?.vehicle?.insuranceCompany ?? "",
-    policyNumber: draft?.vehicle?.policyNumber ?? "",
-    insuranceExpiryDate: draft?.vehicle?.insuranceExpiryDate ?? "",
+    category: "SUV",
+    make: "",
+    model: "",
+    year: new Date().getFullYear().toString(),
+    colour: "",
+    licencePlate: "",
+    province: "Quebec",
+    vin: "",
+    passengerCapacity: "4",
+    luggageCapacity: "4",
+    registrationNumber: "",
+    registrationExpiryDate: "",
+    permitInfo: "",
+    insuranceCompany: "",
+    policyNumber: "",
+    insuranceExpiryDate: "",
   });
+
+  useEffect(() => {
+    if (!draft) return;
+    setAccountForm({
+      firstName: draft.firstName ?? "",
+      lastName: draft.lastName ?? "",
+      email: draft.email ?? "",
+      mobilePhone: draft.account?.mobilePhone ?? "",
+      password: "",
+      preferredLanguage: draft.account?.preferredLanguage ?? "English",
+      termsAccepted: draft.account?.termsAccepted ?? false,
+      privacyAccepted: draft.account?.privacyAccepted ?? false,
+      agreementAccepted: draft.account?.agreementAccepted ?? false,
+    });
+    setPersonalForm({
+      middleName: draft.personal?.middleName ?? "",
+      preferredName: draft.personal?.preferredName ?? "",
+      dateOfBirth: draft.personal?.dateOfBirth ?? "",
+      alternatePhone: draft.personal?.alternatePhone ?? "",
+      residentialAddress: draft.personal?.residentialAddress ?? "",
+      city: draft.personal?.city ?? "",
+      province: draft.personal?.province ?? "",
+      postalCode: draft.personal?.postalCode ?? "",
+      country: draft.personal?.country ?? "Canada",
+      emergencyContactName: draft.personal?.emergencyContactName ?? "",
+      emergencyContactPhone: draft.personal?.emergencyContactPhone ?? "",
+      emergencyContactRelationship: draft.personal?.emergencyContactRelationship ?? "",
+    });
+    setWorkForm({
+      status: draft.workEligibility?.status ?? "Canadian Citizen",
+      documentType: draft.workEligibility?.documentType ?? "Passport",
+      expiryDate: draft.workEligibility?.expiryDate ?? "",
+    });
+    setLicenceForm({
+      licenceNumber: draft.licence?.licenceNumber ?? "",
+      province: draft.licence?.province ?? "Quebec",
+      licenceClass: draft.licence?.licenceClass ?? "Class 5",
+      issueDate: draft.licence?.issueDate ?? "",
+      expiryDate: draft.licence?.expiryDate ?? "",
+    });
+    setVehicleForm({
+      category: draft.vehicle?.category ?? "SUV",
+      make: draft.vehicle?.make ?? "",
+      model: draft.vehicle?.model ?? "",
+      year: draft.vehicle?.year ?? new Date().getFullYear().toString(),
+      colour: draft.vehicle?.colour ?? "",
+      licencePlate: draft.vehicle?.licencePlate ?? "",
+      province: draft.vehicle?.province ?? "Quebec",
+      vin: draft.vehicle?.vin ?? "",
+      passengerCapacity: draft.vehicle?.passengerCapacity ?? "4",
+      luggageCapacity: draft.vehicle?.luggageCapacity ?? "4",
+      registrationNumber: draft.vehicle?.registrationNumber ?? "",
+      registrationExpiryDate: draft.vehicle?.registrationExpiryDate ?? "",
+      permitInfo: draft.vehicle?.permitInfo ?? "",
+      insuranceCompany: draft.vehicle?.insuranceCompany ?? "",
+      policyNumber: draft.vehicle?.policyNumber ?? "",
+      insuranceExpiryDate: draft.vehicle?.insuranceExpiryDate ?? "",
+    });
+  }, [draft]);
 
   const stepIndex = useMemo(() => Math.min(step, stepTitles.length - 1), [step]);
 

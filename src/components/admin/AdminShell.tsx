@@ -27,14 +27,18 @@ export default function AdminShell({
   const router = useRouter();
   const base = `/${locale}/admin`;
   const isLoginPage = pathname === `${base}/login`;
-  const [hydrated] = useState(() => typeof window !== "undefined");
+  const [mounted, setMounted] = useState(false);
 
-  const user = hydrated ? getUser() : null;
-  const token = hydrated ? getToken() : null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const user = mounted ? getUser() : null;
+  const token = mounted ? getToken() : null;
   const checked = isLoginPage || !!token;
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!mounted) return;
     if (!token && !isLoginPage) {
       router.replace(`${base}/login`);
       return;
@@ -43,14 +47,14 @@ export default function AdminShell({
     if (token && user && user.role !== "ADMIN" && !isLoginPage) {
       router.replace(`/${locale}`);
     }
-  }, [base, hydrated, isLoginPage, locale, router, token, user]);
+  }, [base, isLoginPage, locale, mounted, router, token, user]);
 
   // The login page renders without the dashboard chrome.
   if (isLoginPage) {
     return <div className="min-h-screen bg-ink-50">{children}</div>;
   }
 
-  if (!hydrated || !checked) {
+  if (!mounted || !checked) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-ink-50">
         <Loader2 className="h-6 w-6 animate-spin text-ink-400" />

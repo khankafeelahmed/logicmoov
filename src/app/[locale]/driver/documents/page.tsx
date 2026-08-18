@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
 import {
@@ -11,7 +11,7 @@ import {
   getDriverEligibilityStatus,
   upsertComplianceDocument,
 } from "@/lib/complianceDocuments";
-import { getCurrentDriverApplication } from "@/lib/driverOnboarding";
+import { getCurrentDriverApplication, type DriverApplicationDraft } from "@/lib/driverOnboarding";
 
 const STATUS_STYLES: Record<ComplianceDocumentRecord["status"], string> = {
   missing: "bg-slate-100 text-slate-700",
@@ -23,7 +23,12 @@ const STATUS_STYLES: Record<ComplianceDocumentRecord["status"], string> = {
 
 export default function DriverDocumentsPage() {
   const { locale } = useParams<{ locale: string }>();
-  const draft = useMemo(() => getCurrentDriverApplication(), []);
+  const [draft, setDraft] = useState<DriverApplicationDraft | null>(null);
+
+  useEffect(() => {
+    setDraft(getCurrentDriverApplication());
+  }, []);
+
   const driverEmail = draft?.email ?? "";
   const initialRecords = useMemo(
     () => (driverEmail ? getDriverComplianceRecord(driverEmail).documents : {}),

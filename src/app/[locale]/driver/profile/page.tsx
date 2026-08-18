@@ -1,31 +1,58 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
-import { getCurrentDriverApplication, saveDriverApplication } from "@/lib/driverOnboarding";
+import { getCurrentDriverApplication, saveDriverApplication, type DriverApplicationDraft } from "@/lib/driverOnboarding";
 
 export default function DriverProfilePage() {
   const { locale } = useParams<{ locale: string }>();
-  const draft = useMemo(() => getCurrentDriverApplication(), []);
+  const [draft, setDraft] = useState<DriverApplicationDraft | null>(null);
+
+  useEffect(() => {
+    setDraft(getCurrentDriverApplication());
+  }, []);
+
   const [form, setForm] = useState({
-    firstName: draft?.personal?.firstName ?? draft?.firstName ?? "",
-    middleName: draft?.personal?.middleName ?? "",
-    lastName: draft?.personal?.lastName ?? draft?.lastName ?? "",
-    preferredName: draft?.personal?.preferredName ?? "",
-    dateOfBirth: draft?.personal?.dateOfBirth ?? "",
-    email: draft?.personal?.email ?? draft?.email ?? "",
-    mobilePhone: draft?.personal?.mobilePhone ?? draft?.account?.mobilePhone ?? "",
-    alternatePhone: draft?.personal?.alternatePhone ?? "",
-    residentialAddress: draft?.personal?.residentialAddress ?? "",
-    city: draft?.personal?.city ?? "",
-    province: draft?.personal?.province ?? "",
-    postalCode: draft?.personal?.postalCode ?? "",
-    country: draft?.personal?.country ?? "Canada",
-    emergencyContactName: draft?.personal?.emergencyContactName ?? "",
-    emergencyContactPhone: draft?.personal?.emergencyContactPhone ?? "",
-    emergencyContactRelationship: draft?.personal?.emergencyContactRelationship ?? "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    preferredName: "",
+    dateOfBirth: "",
+    email: "",
+    mobilePhone: "",
+    alternatePhone: "",
+    residentialAddress: "",
+    city: "",
+    province: "",
+    postalCode: "",
+    country: "Canada",
+    emergencyContactName: "",
+    emergencyContactPhone: "",
+    emergencyContactRelationship: "",
   });
+
+  useEffect(() => {
+    if (!draft) return;
+    setForm({
+      firstName: draft.personal?.firstName ?? draft.firstName ?? "",
+      middleName: draft.personal?.middleName ?? "",
+      lastName: draft.personal?.lastName ?? draft.lastName ?? "",
+      preferredName: draft.personal?.preferredName ?? "",
+      dateOfBirth: draft.personal?.dateOfBirth ?? "",
+      email: draft.personal?.email ?? draft.email ?? "",
+      mobilePhone: draft.personal?.mobilePhone ?? draft.account?.mobilePhone ?? "",
+      alternatePhone: draft.personal?.alternatePhone ?? "",
+      residentialAddress: draft.personal?.residentialAddress ?? "",
+      city: draft.personal?.city ?? "",
+      province: draft.personal?.province ?? "",
+      postalCode: draft.personal?.postalCode ?? "",
+      country: draft.personal?.country ?? "Canada",
+      emergencyContactName: draft.personal?.emergencyContactName ?? "",
+      emergencyContactPhone: draft.personal?.emergencyContactPhone ?? "",
+      emergencyContactRelationship: draft.personal?.emergencyContactRelationship ?? "",
+    });
+  }, [draft]);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
