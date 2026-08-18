@@ -1,4 +1,5 @@
-import { hasSupabaseConfig, supabase } from "@/lib/supabaseClient";
+import { getDriverAccounts } from "@/lib/driverAuth";
+import { hasSupabaseConfig, saveDriverRecord, saveVehicleRecord, supabase } from "@/lib/supabaseClient";
 
 export type DriverDocumentStatus = "pending" | "approved" | "rejected" | "expired";
 export type DriverApplicationStatus =
@@ -116,6 +117,119 @@ export type DriverApplicationDraft = {
 
 const DRIVER_APPLICATION_KEY = "taxi_logicmoov_driver_application";
 
+function toDbApplicationStatus(status?: string): string {
+  switch (status) {
+    case "approved":
+      return "approved";
+    case "rejected":
+      return "rejected";
+    case "suspended":
+      return "suspended";
+    case "under_review":
+    case "pending_verification":
+    case "submitted":
+      return "submitted";
+    case "needs_information":
+      return "documents_required";
+    case "email_unverified":
+    default:
+      return "draft";
+  }
+}
+
+async function syncDraftToSupabase(draft: DriverApplicationDraft) {
+  if (!hasSupabaseConfig() || !draft.email) return;
+
+  try {
+    const { data: userData } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+    const driverPayload = {
+      first_name: draft.personal?.firstName || draft.firstName || "",
+      last_name: draft.personal?.lastName || draft.lastName || "",
+      email: draft.email,
+      phone: draft.account?.mobilePhone || draft.personal?.mobilePhone || "",
+      date_of_birth: draft.personal?.dateOfBirth || null,
+      address: draft.personal?.residentialAddress || null,
+      city: draft.personal?.city || null,
+      province: draft.personal?.province || null,
+      postal_code: draft.personal?.postalCode || null,
+      driver_license_number: draft.licence?.licenceNumber || null,
+      profile_photo_url: null,
+      application_status: toDbApplicationStatus(draft.status),
+      ...(userData?.user?.id ? { user_id: userData.user.id } : {}),
+    };
+
+    const { data: existingDrivers } = await supabase
+      .from("drivers")
+      .select("id")
+      .eq("email", draft.email)
+      .limit(1);
+
+    let driverId = existingDrivers?.[0]?.id ? String(existingDrivers[0].id) : "";
+    if (!driverId) {
+      const saved = await saveDriverRecord(driverPayload as Record<string, unknown>);
+      driverId = saved.data && typeof saved.data.id === "string" ? saved.data.id : "";
+    } else {
+      await supabase.from("drivers").update(driverPayload).eq("id", driverId);
+    }
+
+    if (!driverId) return;
+
+    const vehiclePayload = {
+      driver_id: driverId,
+      make: draft.vehicle?.make || null,
+      model: draft.vehicle?.model || null,
+      year: draft.vehicle?.year ? Number(draft.vehicle.year) : null,
+      colour: draft.vehicle?.colour || null,
+      vin: draft.vehicle?.vin || null,
+      license_plate: draft.vehicle?.licencePlate || null,
+      vehicle_type: draft.vehicle?.category || null,
+      passenger_capacity: draft.vehicle?.passengerCapacity ? Number(draft.vehicle.passengerCapacity) : null,
+      ownership_type: draft.vehicle?.category || null,
+    };
+
+    const { data: existingVehicles } = await supabase
+      .from("vehicles")
+      .select("id")
+      .eq("driver_id", driverId)
+      .limit(1);
+
+    if (existingVehicles?.[0]?.id) {
+      await supabase.from("vehicles").update(vehiclePayload).eq("id", String(existingVehicles[0].id));
+    } else {
+      await saveVehicleRecord(vehiclePayload as Record<string, unknown>);
+    }
+
+    const applicationStatus = toDbApplicationStatus(draft.status);
+    const { data: existingApplications } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("driver_id", driverId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    const appPayload = {
+      driver_id: driverId,
+      application_number: `LM-${new Date().getFullYear()}-${String(Date.now()).slice(-6).padStart(6, "0")}`,
+      status: applicationStatus,
+      submitted_at:
+        draft.status === "submitted" || draft.status === "under_review" || draft.status === "pending_verification"
+          ? new Date().toISOString()
+          : null,
+      reviewed_at: null,
+      reviewed_by: null,
+      admin_notes: null,
+    };
+
+    if (existingApplications?.[0]?.id) {
+      await supabase.from("applications").update(appPayload).eq("id", String(existingApplications[0].id));
+    } else {
+      await supabase.from("applications").insert(appPayload).select("id").single();
+    }
+  } catch {
+    // Ignore remote persistence failures and keep the local draft flow working.
+  }
+}
+
 async function hashPassword(password: string): Promise<string> {
   if (typeof crypto !== "undefined" && crypto.subtle && typeof window !== "undefined") {
     const encoded = new TextEncoder().encode(password);
@@ -157,8 +271,30 @@ export async function createDriverAccount(input: {
   const email = input.email.trim().toLowerCase();
   const drafts = readDrafts();
   const existing = drafts.find((draft) => draft.email.toLowerCase() === email);
-  if (existing) {
+  const adminAccounts = getDriverAccounts();
+  const activeSessionEmail =
+    typeof window !== "undefined"
+      ? (() => {
+          try {
+            const raw = window.localStorage.getItem("taxi_logicmoov_driver_session");
+            if (!raw) return "";
+            const parsed = JSON.parse(raw) as { email?: string };
+            return String(parsed.email ?? "").trim().toLowerCase();
+          } catch {
+            return "";
+          }
+        })()
+      : "";
+
+  const hasRealAdminAccount = adminAccounts.some((account) => account.email.toLowerCase() === email);
+  const hasActiveSessionForEmail = activeSessionEmail === email;
+
+  if (existing && (hasRealAdminAccount || hasActiveSessionForEmail)) {
     return { ok: false, message: "A driver account already exists for this email." };
+  }
+
+  if (existing && !hasRealAdminAccount && !hasActiveSessionForEmail) {
+    writeDrafts(drafts.filter((draft) => draft.email.toLowerCase() !== email));
   }
 
   const passwordHash = await hashPassword(input.password);
@@ -194,7 +330,7 @@ export async function createDriverAccount(input: {
   };
 
   if (hasSupabaseConfig() && supabase?.auth) {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password: input.password,
       options: {
@@ -209,6 +345,35 @@ export async function createDriverAccount(input: {
 
     if (error) {
       return { ok: false, message: error.message || "Unable to create the authentication account." };
+    }
+
+    let authUserId = data?.user?.id ?? null;
+    if (authUserId && !data?.session) {
+      const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: input.password,
+      });
+      if (!signInError) {
+        authUserId = sessionData?.user?.id ?? authUserId;
+      }
+    }
+
+    if (authUserId) {
+      await saveDriverRecord({
+        user_id: authUserId,
+        first_name: draft.firstName,
+        last_name: draft.lastName,
+        email: draft.email,
+        phone: draft.account?.mobilePhone || "",
+        date_of_birth: draft.personal?.dateOfBirth || null,
+        address: draft.personal?.residentialAddress || null,
+        city: draft.personal?.city || null,
+        province: draft.personal?.province || null,
+        postal_code: draft.personal?.postalCode || null,
+        driver_license_number: draft.licence?.licenceNumber || null,
+        profile_photo_url: null,
+        application_status: toDbApplicationStatus(draft.status),
+      } as Record<string, unknown>);
     }
   }
 
@@ -274,6 +439,7 @@ export function saveDriverApplication(partial: Partial<DriverApplicationDraft>):
 
   const nextDrafts = existing ? drafts.map((draft) => draft.id === existing.id ? next : draft) : [...drafts, next];
   writeDrafts(nextDrafts);
+  void syncDraftToSupabase(next);
   return next;
 }
 

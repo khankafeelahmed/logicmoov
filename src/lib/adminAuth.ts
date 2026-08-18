@@ -28,5 +28,12 @@ export function getToken(): string | null {
 export function getUser(): AdminUser | null {
   if (typeof window === "undefined") return null;
   const raw = localStorage.getItem(USER_KEY);
-  return raw ? (JSON.parse(raw) as AdminUser) : null;
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as AdminUser;
+  } catch {
+    localStorage.removeItem(USER_KEY);
+    return null;
+  }
 }

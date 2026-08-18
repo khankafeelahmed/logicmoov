@@ -76,6 +76,9 @@ export const COMPLIANCE_DOCUMENT_DEFINITIONS = [
 
 const DRIVER_COMPLIANCE_KEY = "taxi_logicmoov_driver_compliance_v1";
 const COMPLIANCE_AUDIT_KEY = "taxi_logicmoov_compliance_audit_v1";
+const DRIVER_COMPLIANCE_BUCKET = "driver-documents";
+const DRIVER_DOCUMENTS_TABLE = "driver_documents";
+const DRIVER_DOCUMENT_AUDIT_TABLE = "driver_document_audit_log";
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
@@ -108,9 +111,9 @@ async function syncToSupabase(record: ComplianceDocumentRecord) {
         const mimeType = match[1] || record.mimeType || "application/octet-stream";
         const bytes = Uint8Array.from(atob(match[2]), (char) => char.charCodeAt(0));
         const uploadFile = new File([bytes], safeName, { type: mimeType });
-        const { error } = await supabase.storage.from("driver-compliance").upload(path, uploadFile, { contentType: mimeType, upsert: true });
+        const { error } = await supabase.storage.from(DRIVER_COMPLIANCE_BUCKET).upload(path, uploadFile, { contentType: mimeType, upsert: true });
         if (!error) {
-          const signed = await supabase.storage.from("driver-compliance").createSignedUrl(path, 60 * 60 * 24 * 7);
+          const signed = await supabase.storage.from(DRIVER_COMPLIANCE_BUCKET).createSignedUrl(path, 60 * 60 * 24 * 7);
           fileUrl = signed.data?.signedUrl || signed.data?.publicUrl || fileUrl;
         }
       }
@@ -135,11 +138,11 @@ async function syncToSupabase(record: ComplianceDocumentRecord) {
     };
 
     const { error } = await supabase
-      .from("driver_compliance_documents")
+      .from(DRIVER_DOCUMENTS_TABLE)
       .upsert(payload, { onConflict: "driver_email,document_type" });
 
     if (!error) {
-      await supabase.from("driver_compliance_audit_log").insert({
+      await supabase.from(DRIVER_DOCUMENT_AUDIT_TABLE).insert({
         driver_email: record.driverEmail,
         document_type: record.type,
         action: record.status === "rejected" ? "reject" : "upload",

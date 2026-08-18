@@ -1,7 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  "";
 
 const DRIVER_STORAGE_KEY = "taxi_logicmoov_local_drivers";
 const VEHICLE_STORAGE_KEY = "taxi_logicmoov_local_vehicles";
@@ -77,19 +80,52 @@ export function deleteLocalVehicleRecord(id: string, options: { preserveForAdmin
 }
 
 export function hasSupabaseConfig(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY),
+  );
 }
 
 export async function saveDriverRecord(payload: Record<string, unknown>): Promise<{ data: Record<string, unknown> | null; error: Error | null }> {
   if (hasSupabaseConfig()) {
-    const { data, error } = await supabase
-      .from("drivers")
-      .insert(payload)
-      .select("id, full_name, whatsapp_number, email, license_number, license_expiry, languages, photo_url, created_at")
-      .single();
+    const { data: userData } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
 
-    if (!error && data) {
-      return { data, error: null };
+    if (userData?.user?.id && !payload.user_id) {
+      payload.user_id = userData.user.id;
+    }
+
+    const hasActiveAuthUser = Boolean(userData?.user?.id || payload.user_id);
+    if (hasActiveAuthUser) {
+      const sanitized = { ...payload };
+      if (!sanitized.id && typeof crypto !== "undefined" && "randomUUID" in crypto) {
+        sanitized.id = crypto.randomUUID();
+      }
+      if (sanitized.email && typeof sanitized.email === "string") {
+        const { data: existingRows, error: lookupError } = await supabase
+          .from("drivers")
+          .select("id")
+          .eq("email", sanitized.email)
+          .limit(1);
+        if (!lookupError && Array.isArray(existingRows) && existingRows.length > 0) {
+          const { data, error } = await supabase
+            .from("drivers")
+            .update(sanitized)
+            .eq("id", existingRows[0].id)
+            .select("*")
+            .single();
+          if (!error && data) return { data, error: null };
+        }
+      }
+
+      const { data, error } = await supabase
+        .from("drivers")
+        .insert(sanitized)
+        .select("*")
+        .single();
+
+      if (!error && data) {
+        return { data, error: null };
+      }
     }
   }
 
@@ -110,14 +146,56 @@ export async function saveDriverRecord(payload: Record<string, unknown>): Promis
 
 export async function saveVehicleRecord(payload: Record<string, unknown>): Promise<{ data: Record<string, unknown> | null; error: Error | null }> {
   if (hasSupabaseConfig()) {
-    const { data, error } = await supabase
-      .from("vehicles")
-      .insert(payload)
-      .select("id, driver_id, plate_number, vehicle_type, brand, model, year, color, seat_capacity, luggage_capacity, electric, inclusions, photo_urls, created_at")
-      .single();
+    const { data: userData } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
 
-    if (!error && data) {
-      return { data, error: null };
+    const hasActiveAuthUser = Boolean(userData?.user?.id || payload.user_id);
+    if (hasActiveAuthUser) {
+      const sanitized = { ...payload };
+      if (!sanitized.id && typeof crypto !== "undefined" && "randomUUID" in crypto) {
+        sanitized.id = crypto.randomUUID();
+      }
+
+      const authUserId = userData?.user?.id ?? payload.user_id;
+      if (sanitized.driver_id && typeof sanitized.driver_id === "string" && authUserId) {
+        const { data: driverRow } = await supabase
+          .from("drivers")
+          .select("id")
+          .eq("id", sanitized.driver_id)
+          .eq("user_id", authUserId)
+          .limit(1)
+          .maybeSingle();
+        if (!driverRow) {
+          return { data: null, error: new Error("Driver profile is not authorized for this vehicle record.") };
+        }
+      }
+
+      if (sanitized.driver_id && sanitized.license_plate) {
+        const { data: existingRows, error: lookupError } = await supabase
+          .from("vehicles")
+          .select("id")
+          .eq("driver_id", sanitized.driver_id)
+          .eq("license_plate", sanitized.license_plate)
+          .limit(1);
+        if (!lookupError && Array.isArray(existingRows) && existingRows.length > 0) {
+          const { data, error } = await supabase
+            .from("vehicles")
+            .update(sanitized)
+            .eq("id", existingRows[0].id)
+            .select("*")
+            .single();
+          if (!error && data) return { data, error: null };
+        }
+      }
+
+      const { data, error } = await supabase
+        .from("vehicles")
+        .insert(sanitized)
+        .select("*")
+        .single();
+
+      if (!error && data) {
+        return { data, error: null };
+      }
     }
   }
 
@@ -138,8 +216,7 @@ export async function saveVehicleRecord(payload: Record<string, unknown>): Promi
 export async function listDriversFromStore(): Promise<Array<Record<string, unknown>>> {
   if (typeof window === "undefined") return [];
 
-  const hasRealConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-  if (hasRealConfig) {
+  if (hasSupabaseConfig()) {
     const { data, error } = await supabase.from("drivers").select("*");
     if (!error && Array.isArray(data)) {
       return data as Array<Record<string, unknown>>;
@@ -152,8 +229,7 @@ export async function listDriversFromStore(): Promise<Array<Record<string, unkno
 export async function listVehiclesFromStore(): Promise<Array<Record<string, unknown>>> {
   if (typeof window === "undefined") return [];
 
-  const hasRealConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-  if (hasRealConfig) {
+  if (hasSupabaseConfig()) {
     const { data, error } = await supabase.from("vehicles").select("*");
     if (!error && Array.isArray(data)) {
       return data as Array<Record<string, unknown>>;
@@ -164,8 +240,7 @@ export async function listVehiclesFromStore(): Promise<Array<Record<string, unkn
 }
 
 export async function deleteDriverFromStore(id: string): Promise<void> {
-  const hasRealConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-  if (hasRealConfig) {
+  if (hasSupabaseConfig()) {
     const { error } = await supabase.from("drivers").delete().eq("id", id);
     if (!error) return;
   }
@@ -173,8 +248,7 @@ export async function deleteDriverFromStore(id: string): Promise<void> {
 }
 
 export async function deleteVehicleFromStore(id: string): Promise<void> {
-  const hasRealConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-  if (hasRealConfig) {
+  if (hasSupabaseConfig()) {
     const { error } = await supabase.from("vehicles").delete().eq("id", id);
     if (!error) return;
   }
@@ -286,8 +360,9 @@ export const supabase =
   supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
-          persistSession: false,
-          autoRefreshToken: false,
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
         },
       })
     : (fallbackSupabaseClient() as any);
