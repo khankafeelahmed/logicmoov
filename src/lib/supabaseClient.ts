@@ -35,14 +35,48 @@ export function deleteLocalDriverRecord(id: string, options: { preserveForAdmin?
   const vehicleKey = "taxi_logicmoov_local_vehicles";
   const preserveForAdmin = Boolean(options.preserveForAdmin);
 
+  const matchesTarget = (value: Record<string, unknown>) => {
+    if (!value) return false;
+    if (id && String(value.id ?? "") === String(id)) return true;
+
+    const maybeEmail = String(value.email ?? value.user_email ?? "").trim().toLowerCase();
+    const maybeFullName = String(value.full_name ?? value.fullName ?? value.name ?? "").trim().toLowerCase();
+    const maybeLoginId = String(value.login_id ?? value.username ?? "").trim().toLowerCase();
+
+    if (typeof window !== "undefined") {
+      const storedIdentity = window.localStorage.getItem("taxi_logicmoov_last_deleted_driver_identity");
+      if (storedIdentity) {
+        try {
+          const parsed = JSON.parse(storedIdentity) as {
+            email?: string;
+            fullName?: string;
+            loginId?: string;
+          };
+
+          const email = parsed.email?.trim().toLowerCase() ?? "";
+          const fullName = parsed.fullName?.trim().toLowerCase() ?? "";
+          const loginId = parsed.loginId?.trim().toLowerCase() ?? "";
+
+          if (email && maybeEmail && email === maybeEmail) return true;
+          if (fullName && maybeFullName && fullName === maybeFullName) return true;
+          if (loginId && maybeLoginId && loginId === maybeLoginId) return true;
+        } catch {
+          // Ignore malformed stored identity.
+        }
+      }
+    }
+
+    return false;
+  };
+
   if (preserveForAdmin) {
     const drivers = readLocalList<Record<string, unknown>>(driverKey).map((driver) =>
-      String(driver.id) === id
+      matchesTarget(driver)
         ? { ...driver, is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: "driver" }
         : driver,
     );
     const vehicles = readLocalList<Record<string, unknown>>(vehicleKey).map((vehicle) =>
-      String(vehicle.driver_id) === id
+      String(vehicle.driver_id) === id || (typeof window !== "undefined" && window.localStorage.getItem("taxi_logicmoov_last_deleted_driver_identity") && matchesTarget(vehicle as Record<string, unknown>))
         ? { ...vehicle, is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: "driver" }
         : vehicle,
     );
@@ -52,7 +86,7 @@ export function deleteLocalDriverRecord(id: string, options: { preserveForAdmin?
     return;
   }
 
-  const drivers = readLocalList<Record<string, unknown>>(driverKey).filter((driver) => String(driver.id) !== id);
+  const drivers = readLocalList<Record<string, unknown>>(driverKey).filter((driver) => !matchesTarget(driver));
   const vehicles = readLocalList<Record<string, unknown>>(vehicleKey).filter((vehicle) => String(vehicle.driver_id) !== id);
 
   writeLocalList(driverKey, drivers);

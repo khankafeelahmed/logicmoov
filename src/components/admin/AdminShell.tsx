@@ -10,9 +10,6 @@ import {
   Users,
   LogOut,
   Loader2,
-  MessagesSquare,
-  DollarSign,
-  ShieldCheck,
 } from "lucide-react";
 import { clearSession, getToken, getUser } from "@/lib/adminAuth";
 
@@ -66,9 +63,6 @@ export default function AdminShell({
     { label: "Dashboard", href: base, icon: LayoutDashboard },
     { label: "Bookings", href: `${base}/bookings`, icon: CalendarCheck },
     { label: "Drivers", href: `${base}/drivers`, icon: Users },
-    { label: "Compliance", href: `${base}/compliance`, icon: ShieldCheck },
-    { label: "Fares", href: `${base}/fares`, icon: DollarSign },
-    { label: "Support", href: `${base}/support`, icon: MessagesSquare },
   ];
 
   function logout() {

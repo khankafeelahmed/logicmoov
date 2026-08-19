@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Car, CheckCircle2, ClipboardList, FileCheck2, ShieldCheck, UserCircle2, WalletCards } from "lucide-react";
+import { ArrowUpRight, Car, ClipboardList, FileCheck2, ShieldCheck, UserCircle2 } from "lucide-react";
 
 interface DriverPortalLayoutProps {
   locale: string;
@@ -14,11 +14,7 @@ interface DriverPortalLayoutProps {
 
 const items = [
   { id: "dashboard", label: "Dashboard", href: "/driver/dashboard" },
-  { id: "profile", label: "Profile", href: "/driver/profile" },
-  { id: "vehicle", label: "Vehicle", href: "/driver/vehicle" },
   { id: "documents", label: "Documents & Compliance", href: "/driver/documents" },
-  { id: "application", label: "Application", href: "/driver/application" },
-  { id: "status", label: "Status", href: "/driver/status" },
 ] as const;
 
 export default function DriverPortalLayout({ locale, active, title, subtitle, children }: DriverPortalLayoutProps) {
@@ -75,12 +71,8 @@ export default function DriverPortalLayout({ locale, active, title, subtitle, ch
                     }`}
                   >
                     {item.id === "dashboard" && <ClipboardList className="h-4 w-4" />}
-                    {item.id === "profile" && <UserCircle2 className="h-4 w-4" />}
-                    {item.id === "vehicle" && <Car className="h-4 w-4" />}
-                    {item.id === "documents" && <FileCheck2 className="h-4 w-4" />}
-                    {item.id === "application" && <CheckCircle2 className="h-4 w-4" />}
-                    {item.id === "status" && <WalletCards className="h-4 w-4" />}
-                    {item.label}
+                      {item.id === "documents" && <FileCheck2 className="h-4 w-4" />}
+                      {item.label}
                   </Link>
                 );
               })}

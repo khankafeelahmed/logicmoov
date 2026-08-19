@@ -3,56 +3,84 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
-import { getCurrentDriverApplication, signInDriverAccount } from "@/lib/driverOnboarding";
+import { getDriverPortalSession, loginDriverAccount } from "@/lib/driverPortal";
 
 export default function DriverLoginPage() {
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ loginId: "", password: "" });
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const draft = getCurrentDriverApplication();
-    if (draft?.email) {
-      setForm((current) => ({ ...current, email: draft.email }));
+    if (getDriverPortalSession()) {
+      router.replace(`/${locale}/driver/documents`);
     }
-  }, []);
+  }, [locale, router]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const draft = signInDriverAccount(form.email, form.password);
-    if (!draft) {
-      setError("Invalid driver email or account not yet verified.");
-      return;
-    }
+    setError(null);
+    setIsLoading(true);
 
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("taxi_logicmoov_driver_session", JSON.stringify({
-        email: draft.email,
-        fullName: draft.fullName,
-        status: draft.status,
-      }));
+    try {
+      await loginDriverAccount(form.loginId, form.password);
+      router.push(`/${locale}/driver/documents`);
+    } catch {
+      setError("Invalid Login ID or Password.");
+    } finally {
+      setIsLoading(false);
     }
-    router.push(`/${locale}/driver/dashboard`);
   };
 
   return (
-    <DriverPortalLayout locale={String(locale)} active="login" title="Driver login" subtitle="Access your driver portal and manage your application.">
+    <DriverPortalLayout locale={String(locale)} active="login" title="Driver login" subtitle="Use your Login ID and password to access your portal.">
       <form onSubmit={handleSubmit} className="mx-auto max-w-xl space-y-5 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
         {error && <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+
         <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold text-slate-700">Email</span>
-          <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm" required />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold text-slate-700">Password</span>
-          <input type="password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm" required />
+          <span className="mb-1.5 block text-sm font-semibold text-slate-700">Login ID</span>
+          <input
+            type="text"
+            value={form.loginId}
+            onChange={(event) => setForm({ ...form, loginId: event.target.value })}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
+            placeholder="jdoe"
+            required
+          />
         </label>
 
-        <div className="flex items-center justify-between gap-3">
-          <a href={`/${locale}/driver/register`} className="text-sm font-semibold text-[#1d4ed8]">Need an account? Register</a>
-          <button type="submit" className="rounded-xl bg-[#111827] px-5 py-3 text-sm font-bold text-white">Sign in</button>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold text-slate-700">Password</span>
+          <input
+            type="password"
+            value={form.password}
+            onChange={(event) => setForm({ ...form, password: event.target.value })}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
+            required
+          />
+        </label>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={() => router.push(`/${locale}/driver/register`)}
+            className="text-sm font-semibold text-[#1d4ed8]"
+          >
+            Need an account? Register
+          </button>
+          <button
+            type="button"
+            onClick={() => setError("Password reset is not available yet. Please contact support.")}
+            className="text-sm font-semibold text-slate-600"
+          >
+            Forgot Password
+          </button>
         </div>
+
+        <button type="submit" disabled={isLoading} className="w-full rounded-xl bg-[#111827] px-5 py-3 text-sm font-bold text-white disabled:opacity-60">
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
       </form>
     </DriverPortalLayout>
   );

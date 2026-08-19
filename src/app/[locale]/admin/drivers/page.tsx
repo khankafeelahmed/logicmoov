@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Loader2, Star } from "lucide-react";
 import { api, type Driver } from "@/lib/api";
 import { getToken, clearSession } from "@/lib/adminAuth";
+import { supabase } from "@/lib/supabaseClient";
 import {
   deleteDriverAccountByIdentity,
   getDriverAccounts,
@@ -15,15 +16,87 @@ import StatusBadge from "@/components/admin/StatusBadge";
 import AddDriverModal from "@/components/AddDriverModal";
 import AddVehicleModal from "@/components/AddVehicleModal";
 
+type DriverDocumentRecord = {
+  id: string;
+  driverId: string;
+  documentType: string;
+  fileName: string;
+  filePath: string;
+  status: string;
+  mimeType?: string | null;
+  url?: string;
+};
+
 export default function AdminDriversPage() {
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [driverDocuments, setDriverDocuments] = useState<Record<string, DriverDocumentRecord[]>>({});
   const [showDriverModal, setShowDriverModal] = useState(false);
   const [showVehicleModal, setShowVehicleModal] = useState(false);
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
+
+  const loadDriverDocuments = useCallback(async (driverList: Driver[]) => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      setDriverDocuments({});
+      return;
+    }
+
+    const ids = driverList.map((driver) => String(driver.id)).filter(Boolean);
+    if (ids.length === 0) {
+      setDriverDocuments({});
+      return;
+    }
+
+    const { data, error: documentsError } = await supabase
+      .from("driver_documents")
+      .select("id, driver_id, document_type, file_path, original_filename, status, mime_type")
+      .in("driver_id", ids);
+
+    if (documentsError || !Array.isArray(data)) {
+      setDriverDocuments({});
+      return;
+    }
+
+    const docsByDriver: Record<string, DriverDocumentRecord[]> = {};
+
+    for (const item of data) {
+      const driverId = String(item.driver_id);
+      const path = typeof item.file_path === "string" ? item.file_path : "";
+      const name = typeof item.original_filename === "string" ? item.original_filename : "Document";
+      const docType = String(item.document_type ?? "document");
+
+      const signedUrl = path
+        ? await (async () => {
+            try {
+              const { data: signedData } = await supabase.storage
+                .from("driver-documents")
+                .createSignedUrl(path, 60 * 60 * 24 * 7);
+              return signedData?.signedUrl ?? "";
+            } catch {
+              return "";
+            }
+          })()
+        : "";
+
+      const row: DriverDocumentRecord = {
+        id: String(item.id),
+        driverId,
+        documentType: docType,
+        fileName: name,
+        filePath: path,
+        status: String(item.status ?? "pending"),
+        mimeType: typeof item.mime_type === "string" ? item.mime_type : null,
+        url: signedUrl,
+      };
+
+      docsByDriver[driverId] = [...(docsByDriver[driverId] ?? []), row];
+    }
+
+    setDriverDocuments(docsByDriver);
+  }, []);
 
   const load = useCallback(async () => {
     const token = getToken();
@@ -33,6 +106,7 @@ export default function AdminDriversPage() {
     try {
       const res = await api.listDrivers(token);
       setDrivers(res.drivers);
+      await loadDriverDocuments(res.drivers);
     } catch (err) {
       if ((err as { status?: number }).status === 401) {
         clearSession();
@@ -43,13 +117,57 @@ export default function AdminDriversPage() {
     } finally {
       setLoading(false);
     }
-  }, [router, locale]);
+  }, [router, locale, loadDriverDocuments]);
 
-  const handleDeleteDriver = (driver: Driver) => {
+  const handleDeleteDriver = async (driver: Driver) => {
+    const identity = {
+      email: driver.user.email,
+      fullName: driver.user.fullName,
+      loginId: driver.user.fullName,
+    };
+
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("taxi_logicmoov_last_deleted_driver_identity", JSON.stringify(identity));
+    }
+
+    try {
+      const response = await fetch("/api/admin/delete-driver", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          driverId: driver.id,
+          userId: driver.user.id,
+        }),
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Delete request failed.");
+      }
+    } catch {
+      try {
+        const { data: driverRow } = await supabase
+          .from("drivers")
+          .select("id, user_id")
+          .eq("id", driver.id)
+          .maybeSingle();
+
+        if (driverRow?.id) {
+          await supabase.from("driver_documents").delete().eq("driver_id", driverRow.id);
+          await supabase.from("drivers").delete().eq("id", driverRow.id);
+        }
+      } catch {
+        // Ignore DB deletion errors and continue with local cleanup.
+      }
+    }
+
     deleteLocalDriverRecord(driver.id);
     deleteDriverAccountByIdentity({
       email: driver.user.email,
       fullName: driver.user.fullName,
+      username: driver.user.fullName,
     });
     void load();
   };
@@ -102,6 +220,44 @@ export default function AdminDriversPage() {
   const formatLanguages = (driver: Driver) => {
     if (!driver.languages || driver.languages.length === 0) return "Not added";
     return driver.languages.join(", ");
+  };
+  const formatDocumentLabel = (documentType: string) => {
+    const normalized = documentType.toLowerCase();
+    const labels: Record<string, string> = {
+      transport_operating_license: "Transport Operating Licence",
+      saaq_taxi_licence: "SAAQ Taxi Licence",
+      fleet_vehicle_insurance: "Fleet / Vehicle Insurance",
+      taxi_registration_certificate: "Taxi Registration Certificate",
+      saaq_mechanical_inspection: "Mechanical Inspection Certificate",
+      driver_license: "Driver License",
+      vehicle_insurance: "Vehicle Insurance",
+    };
+
+    return labels[normalized] ?? documentType.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+  const handleDownloadDocument = async (doc: DriverDocumentRecord) => {
+    if (!doc.url) return;
+
+    try {
+      const response = await fetch(doc.url, { method: "GET" });
+      if (!response.ok) {
+        window.open(doc.url, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = doc.fileName || "document";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(doc.url, "_blank", "noopener,noreferrer");
+    }
   };
 
   useEffect(() => {
@@ -159,18 +315,14 @@ export default function AdminDriversPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase text-ink-400">
-                <th className="px-4 py-3 font-semibold">Name</th>
-                <th className="px-4 py-3 font-semibold">Contact</th>
-                <th className="px-4 py-3 font-semibold">License</th>
-                <th className="px-4 py-3 font-semibold">Vehicle</th>
-                <th className="px-4 py-3 font-semibold">Rating</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Driver login ID</th>
+                <th className="px-4 py-3 font-semibold">Uploaded docs</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-100">
               {drivers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-ink-400">
+                  <td colSpan={2} className="px-4 py-8 text-center text-ink-400">
                     No drivers found.
                   </td>
                 </tr>
@@ -188,7 +340,12 @@ export default function AdminDriversPage() {
                             )}
                           </div>
                           <div className="space-y-1">
-                            <div>{d.user.fullName}</div>
+                            <div className="text-[11px] font-medium text-ink-500">
+                              {d.user.fullName && d.user.fullName !== "Unknown driver" ? d.user.fullName : "Driver login ID"}
+                            </div>
+                            <div className="text-sm font-semibold text-ink-900">
+                              {d.user.fullName && d.user.fullName !== "Unknown driver" ? d.user.fullName : d.user.email || "—"}
+                            </div>
                             {getDriverPhotoUrl(d) && (
                               <a
                                 href={getDriverPhotoUrl(d)!}
@@ -202,7 +359,7 @@ export default function AdminDriversPage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => handleDeleteDriver(d)}
+                          onClick={() => void handleDeleteDriver(d)}
                           className="rounded-md border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100"
                         >
                           Delete
@@ -210,110 +367,32 @@ export default function AdminDriversPage() {
                       </div>
                     </td>
                     <td className="px-4 py-4 align-top text-ink-600">
-                      <div className="space-y-1">
-                        <div><span className="font-semibold text-ink-700">WhatsApp:</span> {d.user.phone ?? "—"}</div>
-                        <div><span className="font-semibold text-ink-700">Email:</span> {d.user.email || "—"}</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 align-top font-mono text-ink-600">
-                      <div className="space-y-1">
-                        <div><span className="font-semibold text-ink-700">License Number:</span> {d.licenseNumber || "—"}</div>
-                        <div><span className="font-semibold text-ink-700">Expiry:</span> {d.licenseExpiry || "—"}</div>
-                        <div><span className="font-semibold text-ink-700">Languages:</span> {formatLanguages(d)}</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 align-top text-ink-600">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3">
-                          {getVehiclePhotoUrl(d) ? (
-                            <div className="h-14 w-14 overflow-hidden rounded-lg border border-ink-200 bg-ink-50">
-                              <img src={getVehiclePhotoUrl(d)!} alt={`${d.vehicle?.make ?? "Vehicle"} ${d.vehicle?.model ?? ""}`} className="h-full w-full object-cover" />
+                      <div className="space-y-2">
+                        {(driverDocuments[d.id] ?? []).length > 0 ? (
+                          (driverDocuments[d.id] ?? []).map((doc) => (
+                            <div key={doc.id} className="flex items-center justify-between gap-2 rounded border border-ink-200 bg-ink-50 px-2 py-2">
+                              <div className="min-w-0">
+                                <div className="truncate text-[11px] font-semibold text-ink-700">
+                                  {formatDocumentLabel(doc.documentType)}
+                                </div>
+                                <div className="truncate text-[10px] text-ink-500">{doc.fileName}</div>
+                              </div>
+                              {doc.url ? (
+                                <button
+                                  type="button"
+                                  onClick={() => void handleDownloadDocument(doc)}
+                                  className="shrink-0 text-[10px] font-semibold text-brand-600 hover:underline"
+                                >
+                                  Download
+                                </button>
+                              ) : null}
                             </div>
-                          ) : (
-                            <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-dashed border-ink-200 bg-ink-50 text-lg text-ink-400">
-                              🚕
-                            </div>
-                          )}
-                          <div className="space-y-1">
-                            <div><span className="font-semibold text-ink-700">Plate Number:</span> {d.vehicle?.plate ?? "—"}</div>
-                            <div><span className="font-semibold text-ink-700">Vehicle Type:</span> {d.vehicle?.category ?? "—"}</div>
-                            <div><span className="font-semibold text-ink-700">Brand:</span> {d.vehicle?.make ?? "—"}</div>
-                            <div><span className="font-semibold text-ink-700">Model:</span> {d.vehicle?.model ?? "—"}</div>
-                            <div><span className="font-semibold text-ink-700">Year:</span> {d.vehicle?.year ?? "—"}</div>
-                            <div><span className="font-semibold text-ink-700">Color:</span> {d.vehicle?.color ?? "—"}</div>
-                            <div><span className="font-semibold text-ink-700">Seat Capacity:</span> {d.vehicle?.seatCapacity ?? "—"}</div>
-                            <div><span className="font-semibold text-ink-700">Luggage Capacity:</span> {d.vehicle?.luggageCapacity ?? "—"}</div>
-                            <div><span className="font-semibold text-ink-700">Electric Vehicle:</span> {d.vehicle?.electric ? "Yes" : d.vehicle ? "No" : "—"}</div>
-                            <div><span className="font-semibold text-ink-700">Features:</span> {d.vehicle?.features && d.vehicle.features.length > 0 ? d.vehicle.features.join(", ") : "—"}</div>
-                            {getVehiclePhotoUrl(d) && (
-                              <a
-                                href={getVehiclePhotoUrl(d)!}
-                                download
-                                className="inline-block text-[11px] font-medium text-brand-600 underline-offset-2 hover:underline"
-                              >
-                                Download image
-                              </a>
-                            )}
+                          ))
+                        ) : (
+                          <div className="rounded border border-dashed border-ink-200 bg-ink-50 px-2 py-2 text-[11px] text-ink-500">
+                            No documents uploaded
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowVehicleModal(true);
-                              setSelectedDriverId(d.id);
-                            }}
-                            className="rounded-md border border-ink-200 bg-white px-2 py-1 text-[11px] font-semibold text-ink-700 hover:bg-ink-50"
-                          >
-                            Add Vehicle
-                          </button>
-                          {d.vehicle && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteVehicle(d.id)}
-                              className="rounded-md border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100"
-                            >
-                              Delete Vehicle
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1 text-ink-700">
-                        <Star className="h-3.5 w-3.5 fill-brand-500 text-brand-500" />
-                        {d.rating.toFixed(1)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-col gap-2">
-                        <StatusBadge status={d.status} />
-                        <div className="flex flex-wrap gap-2">
-                          {d.status === "PENDING" ? (
-                            <button
-                              type="button"
-                              onClick={() => handleApprovalChange(d, "enabled")}
-                              className="rounded-md border border-green-200 bg-green-50 px-2 py-1 text-[11px] font-semibold text-green-700 hover:bg-green-100"
-                            >
-                              Approve
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => handleApprovalChange(d, "pending")}
-                              className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700 hover:bg-amber-100"
-                            >
-                              Mark pending
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => handleApprovalChange(d, "suspended")}
-                            className="rounded-md border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-100"
-                          >
-                            Suspend
-                          </button>
-                        </div>
+                        )}
                       </div>
                     </td>
                   </tr>
