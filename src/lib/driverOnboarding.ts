@@ -49,6 +49,7 @@ export type DriverApplicationDraft = {
     lastName: string;
     preferredName?: string;
     dateOfBirth?: string;
+    gender?: string;
     email: string;
     mobilePhone: string;
     alternatePhone?: string;
@@ -289,12 +290,13 @@ export async function createDriverAccount(input: {
   const hasRealAdminAccount = adminAccounts.some((account) => account.email.toLowerCase() === email);
   const hasActiveSessionForEmail = activeSessionEmail === email;
 
+  // Never allow re-registration for an existing account — protects against accidental data loss
   if (existing && (hasRealAdminAccount || hasActiveSessionForEmail)) {
-    return { ok: false, message: "A driver account already exists for this email." };
+    return { ok: false, message: "An account already exists for this email. Please use the Sign In tab to continue." };
   }
 
-  if (existing && !hasRealAdminAccount && !hasActiveSessionForEmail) {
-    writeDrafts(drafts.filter((draft) => draft.email.toLowerCase() !== email));
+  if (existing) {
+    return { ok: false, message: "An account already exists for this email. Please use the Sign In tab to log in." };
   }
 
   const passwordHash = await hashPassword(input.password);
