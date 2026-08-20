@@ -123,7 +123,7 @@ export default function AdminDriversPage() {
     const identity = {
       email: driver.user.email,
       fullName: driver.user.fullName,
-      loginId: driver.user.loginId ?? driver.user.fullName,
+      loginId: driver.user.fullName,
     };
 
     if (typeof window !== "undefined") {
@@ -167,7 +167,7 @@ export default function AdminDriversPage() {
     deleteDriverAccountByIdentity({
       email: driver.user.email,
       fullName: driver.user.fullName,
-      username: driver.user.loginId ?? driver.user.fullName,
+      username: driver.user.fullName,
     });
     void load();
   };
@@ -220,15 +220,6 @@ export default function AdminDriversPage() {
   const formatLanguages = (driver: Driver) => {
     if (!driver.languages || driver.languages.length === 0) return "Not added";
     return driver.languages.join(", ");
-  };
-  const splitFullName = (value: string) => {
-    const trimmed = value?.trim() ?? "";
-    if (!trimmed) return { firstName: "—", lastName: "—" };
-    const parts = trimmed.split(/\s+/);
-    return {
-      firstName: parts[0] || "—",
-      lastName: parts.slice(1).join(" ") || "—",
-    };
   };
   const formatDocumentLabel = (documentType: string) => {
     const normalized = documentType.toLowerCase();
@@ -354,33 +345,6 @@ export default function AdminDriversPage() {
                             </div>
                             <div className="text-sm font-semibold text-ink-900">
                               {d.user.fullName && d.user.fullName !== "Unknown driver" ? d.user.fullName : d.user.email || "—"}
-                            </div>
-                            <div className="mt-3 rounded-xl border border-ink-200 bg-ink-50 p-2.5">
-                              <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-500">
-                                Login ID
-                              </div>
-                              <div className="mb-2 text-sm font-medium text-ink-900">{d.user.loginId || "—"}</div>
-                              <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-500">
-                                Driver profile
-                              </div>
-                              <div className="grid gap-2 text-xs text-ink-700 sm:grid-cols-2">
-                                <div>
-                                  <div className="text-[10px] uppercase tracking-[0.08em] text-ink-400">First Name</div>
-                                  <div className="mt-0.5 font-medium text-ink-900">{splitFullName(d.user.fullName).firstName}</div>
-                                </div>
-                                <div>
-                                  <div className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Last Name</div>
-                                  <div className="mt-0.5 font-medium text-ink-900">{splitFullName(d.user.fullName).lastName}</div>
-                                </div>
-                                <div className="sm:col-span-2">
-                                  <div className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Email</div>
-                                  <div className="mt-0.5 font-medium text-ink-900">{d.user.email || "—"}</div>
-                                </div>
-                                <div className="sm:col-span-2">
-                                  <div className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Phone Number</div>
-                                  <div className="mt-0.5 font-medium text-ink-900">{d.user.phone || "—"}</div>
-                                </div>
-                              </div>
                             </div>
                             {getDriverPhotoUrl(d) && (
                               <a

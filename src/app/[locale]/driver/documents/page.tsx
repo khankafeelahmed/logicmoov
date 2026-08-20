@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
-import { supabase } from "@/lib/supabaseClient";
 import {
   DRIVER_DOCUMENT_DEFINITIONS,
   getDriverPortalSession,
@@ -17,10 +16,6 @@ export default function DriverDocumentsPage() {
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
   const [documents, setDocuments] = useState<Record<string, unknown>[]>([]);
-  const [profile, setProfile] = useState({ firstName: "", lastName: "", email: "", phone: "" });
-  const [profileSaving, setProfileSaving] = useState(false);
-  const [profileError, setProfileError] = useState<string | null>(null);
-  const [profileNotice, setProfileNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -31,72 +26,17 @@ export default function DriverDocumentsPage() {
   }, [documents]);
 
   useEffect(() => {
-    const session = getDriverPortalSession();
-    if (!session) {
+    if (!getDriverPortalSession()) {
       router.replace(`/${locale}/driver/login`);
       return;
     }
 
-    void loadProfile(session.userId);
     void loadDocuments();
   }, [locale, router]);
-
-  const loadProfile = async (userId: string) => {
-    const { data, error: profileLookupError } = await supabase
-      .from("drivers")
-      .select("first_name, last_name, email, phone")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (profileLookupError || !data) return;
-
-    setProfile({
-      firstName: String(data.first_name ?? ""),
-      lastName: String(data.last_name ?? ""),
-      email: String(data.email ?? ""),
-      phone: String(data.phone ?? ""),
-    });
-  };
 
   const loadDocuments = async () => {
     const rows = await getDriverDocuments();
     setDocuments(rows);
-  };
-
-  const handleSaveProfile = async () => {
-    const session = getDriverPortalSession();
-    if (!session) {
-      router.replace(`/${locale}/driver/login`);
-      return;
-    }
-
-    setProfileSaving(true);
-    setProfileError(null);
-    setProfileNotice(null);
-
-    try {
-      const nextProfile = {
-        first_name: profile.firstName.trim(),
-        last_name: profile.lastName.trim(),
-        email: profile.email.trim(),
-        phone: profile.phone.trim() && profile.phone.trim() !== "N/A" ? profile.phone.trim() : "N/A",
-      };
-
-      const { error: updateError } = await supabase
-        .from("drivers")
-        .update(nextProfile)
-        .eq("user_id", session.userId);
-
-      if (updateError) {
-        throw new Error(updateError.message || "Could not save your profile.");
-      }
-
-      setProfileNotice("Profile saved successfully.");
-    } catch (saveError) {
-      setProfileError(saveError instanceof Error ? saveError.message : "Could not save your profile.");
-    } finally {
-      setProfileSaving(false);
-    }
   };
 
   const handleUpload = async (definitionId: string, file?: File | null) => {
@@ -152,57 +92,6 @@ export default function DriverDocumentsPage() {
   return (
     <DriverPortalLayout locale={String(locale)} active="documents" title="Required Documents" subtitle="Upload the required documents below. Each file must be a PDF, JPG, JPEG, or PNG under 10 MB.">
       <div className="space-y-5">
-        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">Driver profile</h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-semibold text-slate-700">First Name</span>
-              <input
-                value={profile.firstName}
-                onChange={(event) => setProfile((current) => ({ ...current, firstName: event.target.value }))}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#dfeafc]"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-semibold text-slate-700">Last Name</span>
-              <input
-                value={profile.lastName}
-                onChange={(event) => setProfile((current) => ({ ...current, lastName: event.target.value }))}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#dfeafc]"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-semibold text-slate-700">Email</span>
-              <input
-                type="email"
-                value={profile.email}
-                onChange={(event) => setProfile((current) => ({ ...current, email: event.target.value }))}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#dfeafc]"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-semibold text-slate-700">Phone Number</span>
-              <input
-                value={profile.phone}
-                onChange={(event) => setProfile((current) => ({ ...current, phone: event.target.value }))}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#dfeafc]"
-              />
-            </label>
-          </div>
-          <div className="mt-4 flex justify-end">
-            <button
-              type="button"
-              onClick={() => void handleSaveProfile()}
-              disabled={profileSaving}
-              className="rounded-xl bg-[#111827] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
-            >
-              {profileSaving ? "Saving..." : "Save"}
-            </button>
-          </div>
-          {profileError && <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{profileError}</div>}
-          {profileNotice && <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{profileNotice}</div>}
-        </div>
-
         {previewUrl && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4" onClick={closePreview}>
             <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={(event) => event.stopPropagation()}>

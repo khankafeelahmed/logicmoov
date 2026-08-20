@@ -9,17 +9,6 @@ import { getCurrentDriverApplication } from "@/lib/driverOnboarding";
 
 const SESSION_KEY = "taxi_logicmoov_driver_session";
 
-async function hashPassword(password: string): Promise<string> {
-  if (typeof crypto !== "undefined" && crypto.subtle && typeof window !== "undefined") {
-    const encoded = new TextEncoder().encode(password);
-    const digest = await crypto.subtle.digest("SHA-256", encoded);
-    return Array.from(new Uint8Array(digest))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-  }
-  return btoa(password);
-}
-
 export default function DriverLoginPage() {
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
@@ -36,48 +25,27 @@ export default function DriverLoginPage() {
       return;
     }
 
+    if (!hasSupabaseConfig() || !supabase) {
+      setError("Supabase is not configured yet. Add your project URL and anon key to continue.");
+      return;
+    }
+
     setLoading(true);
     try {
       const loginEmail = form.email.trim().toLowerCase();
-      let firstName = "";
-      let lastName = "";
-      let authenticated = false;
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: form.password,
+      });
 
-      // Try Supabase auth first — but don't give up if it fails (e.g. email not confirmed)
-      if (hasSupabaseConfig()) {
-        const { data, error: authError } = await supabase.auth.signInWithPassword({
-          email: loginEmail,
-          password: form.password,
-        });
-        if (!authError && data.user) {
-          firstName = (data.user.user_metadata?.first_name as string | undefined) ?? "";
-          lastName = (data.user.user_metadata?.last_name as string | undefined) ?? "";
-          authenticated = true;
-        }
+      if (authError || !data.user) {
+        setError("Invalid email or password.");
+        return;
       }
 
-      // Always fall back to localStorage hash check (covers: email not confirmed, Supabase down, no config)
-      if (!authenticated) {
-        const raw =
-          typeof window !== "undefined"
-            ? window.localStorage.getItem("taxi_logicmoov_driver_application")
-            : null;
-        const drafts = raw ? (JSON.parse(raw) as Array<Record<string, unknown>>) : [];
-        const hash = await hashPassword(form.password);
-        const match = drafts.find(
-          (d) =>
-            String(d.email ?? "").toLowerCase() === loginEmail &&
-            d.passwordHash === hash,
-        );
-        if (!match) {
-          setError("Invalid email or password.");
-          return;
-        }
-        firstName = String(match.firstName ?? "");
-        lastName = String(match.lastName ?? "");
-      }
+      const firstName = (data.user.user_metadata?.first_name as string | undefined) ?? "";
+      const lastName = (data.user.user_metadata?.last_name as string | undefined) ?? "";
 
-      // Write session and redirect to the register flow (which resumes at the right step)
       if (typeof window !== "undefined") {
         window.localStorage.setItem(
           SESSION_KEY,

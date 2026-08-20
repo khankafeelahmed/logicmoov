@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { assertSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 
 export type DriverPortalSession = {
   userId: string;
@@ -160,6 +160,7 @@ export async function registerDriverAccount(input: {
     return { ok: false, message: "This Login ID is already in use." };
   }
 
+  assertSupabaseConfigured();
   const internalEmail = makeInternalEmail(loginId);
   const { data: authUser, error: signUpError } = await supabase.auth.signUp({
     email: internalEmail,
@@ -202,45 +203,32 @@ export async function registerDriverAccount(input: {
 }
 
 export async function loginDriverAccount(loginId: string, password: string): Promise<DriverPortalSession> {
+  assertSupabaseConfigured();
   const normalizedLoginId = normalizeLoginId(loginId);
   if (!normalizedLoginId) {
     throw new Error("Invalid Login ID or Password.");
   }
 
-  const response = await fetch("/api/driver/resolve-login", {
-   method: "POST",
-   headers: {
-     "Content-Type": "application/json",
-   },
-   body: JSON.stringify({ loginId: normalizedLoginId }),
-  });
+  const { data: driver, error: driverError } = await supabase
+    .from("drivers")
+    .select("*")
+    .eq("login_id", normalizedLoginId)
+    .maybeSingle();
 
-  const payload = (await response.json().catch(() => null)) as {
-   ok?: boolean;
-   error?: string;
-   driver?: {
-     id?: string | number;
-     login_id?: string | null;
-     email?: string | null;
-     first_name?: string | null;
-     last_name?: string | null;
-     phone?: string | null;
-     application_status?: string | null;
-   };
-  } | null;
-
-  if (!response.ok || !payload?.ok || !payload.driver) {
-   const message = payload?.error || "Invalid Login ID or Password.";
-   if (message.includes("login_id") && message.includes("does not exist")) {
+  if (driverError) {
+   if (isMissingLoginIdColumnError(driverError)) {
      throw new Error(DRIVER_LOGIN_ID_SCHEMA_ERROR);
    }
    throw new Error("Invalid Login ID or Password.");
   }
 
-  const driver = payload.driver;
+  if (!driver) {
+   throw new Error("Invalid Login ID or Password.");
+  }
+
   const authEmail = String(driver.email || "");
   if (!authEmail) {
-   throw new Error("Invalid Login ID or Password.");
+    throw new Error("Invalid Login ID or Password.");
   }
 
   const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -269,18 +257,12 @@ export async function loginDriverAccount(loginId: string, password: string): Pro
 }
 
 export async function logoutDriverAccount(): Promise<void> {
-  // Logout must end the active session only. It must never delete or mutate the
-  // persisted driver account record in the database or local storage.
   const hadSession = Boolean(getDriverPortalSession());
 
-  if (hadSession) {
+  if (hadSession && supabase) {
     await supabase.auth.signOut().catch(() => undefined);
-    clearDriverPortalSession();
-    return;
   }
 
-  // Ensure the portal session is cleared even if the user had already signed out
-  // or the browser storage was left in a stale state.
   clearDriverPortalSession();
 }
 

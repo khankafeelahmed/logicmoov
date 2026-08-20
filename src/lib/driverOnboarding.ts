@@ -1,5 +1,5 @@
 import { getDriverAccounts } from "@/lib/driverAuth";
-import { hasSupabaseConfig, saveDriverRecord, saveVehicleRecord, supabase } from "@/lib/supabaseClient";
+import { assertSupabaseConfigured, hasSupabaseConfig, saveDriverRecord, saveVehicleRecord, supabase } from "@/lib/supabaseClient";
 
 export type DriverDocumentStatus = "pending" | "approved" | "rejected" | "expired";
 export type DriverApplicationStatus =
@@ -269,6 +269,10 @@ export async function createDriverAccount(input: {
   privacyAccepted: boolean;
   agreementAccepted: boolean;
 }): Promise<{ ok: boolean; message: string; draft?: DriverApplicationDraft }> {
+  if (!hasSupabaseConfig()) {
+    return { ok: false, message: "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to continue." };
+  }
+
   const email = input.email.trim().toLowerCase();
   const drafts = readDrafts();
   const existing = drafts.find((draft) => draft.email.toLowerCase() === email);
@@ -380,7 +384,7 @@ export async function createDriverAccount(input: {
   }
 
   writeDrafts([...drafts, draft]);
-  return { ok: true, message: "Account created. Please verify your email to continue.", draft };
+  return { ok: true, message: "Account created successfully. You can continue to your profile and upload documents.", draft };
 }
 
 export function getCurrentDriverApplication(): DriverApplicationDraft | null {

@@ -79,21 +79,7 @@ export async function register(input: RegisterInput) {
 }
 
 export async function login(email: string, password: string) {
-  const canonicalEmail = email.trim().toLowerCase();
-  const emailCandidates = Array.from(
-    new Set([
-      canonicalEmail,
-      canonicalEmail === "admin@taximovqc.ca" ? "admin@logicmoov.ca" : "",
-      canonicalEmail === "admin@logicmoov.ca" ? "admin@taximovqc.ca" : "",
-    ].filter(Boolean)),
-  );
-
-  let user = null;
-  for (const candidate of emailCandidates) {
-    user = await prisma.user.findUnique({ where: { email: candidate } });
-    if (user) break;
-  }
-
+  const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw HttpError.unauthorized("Invalid credentials");
 
   const ok = await bcrypt.compare(password, user.passwordHash);

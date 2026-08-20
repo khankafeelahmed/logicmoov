@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Upload, FileText, UserPlus, ChevronRight } from "lucide-react";
@@ -10,7 +10,6 @@ import {
   createDriverAccount,
   getCurrentDriverApplication,
   saveDriverApplication,
-  verifyDriverEmail,
 } from "@/lib/driverOnboarding";
 import { hasSupabaseConfig, supabase } from "@/lib/supabaseClient";
 
@@ -46,17 +45,6 @@ async function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
-async function hashPassword(password: string): Promise<string> {
-  if (typeof crypto !== "undefined" && crypto.subtle && typeof window !== "undefined") {
-    const encoded = new TextEncoder().encode(password);
-    const digest = await crypto.subtle.digest("SHA-256", encoded);
-    return Array.from(new Uint8Array(digest))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-  }
-  return btoa(password);
-}
-
 type Step = "account" | "personal" | "documents" | "success";
 type DocFiles = Record<ComplianceDocumentId, File | null>;
 
@@ -64,42 +52,41 @@ type DocFiles = Record<ComplianceDocumentId, File | null>;
 export default function DriverRegisterPage() {
   const { locale } = useParams<{ locale: string }>();
 
-  const [step, setStep] = useState<Step>("account");
+  const initialSession = readSession();
+  const initialStep: Step = (() => {
+    const existingSession = readSession();
+    if (!existingSession) return "account";
+    const app = getCurrentDriverApplication();
+    if (!app) {
+      if (typeof window !== "undefined") window.localStorage.removeItem(SESSION_KEY);
+      return "account";
+    }
+    if (app.status === "submitted" || app.status === "under_review" || app.status === "approved" || app.status === "pending_verification") {
+      return "success";
+    }
+    const hasPersonal = (app.personal?.city ?? "") !== "" || (app.personal?.residentialAddress ?? "") !== "";
+    return hasPersonal ? "documents" : "personal";
+  })();
+
+  const [step, setStep] = useState<Step>(initialStep);
   const [authMode, setAuthMode] = useState<"register" | "login">("register");
-  const [session, setSession] = useState<DriverSession | null>(null);
+  const [session, setSession] = useState<DriverSession | null>(initialSession);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [regForm, setRegForm] = useState({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" });
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
-  const [personalForm, setPersonalForm] = useState({ phone: "", gender: "", address: "", city: "", province: "Quebec", postalCode: "" });
+  const [personalForm, setPersonalForm] = useState({
+    phone: initialStep === "documents" ? (getCurrentDriverApplication()?.account?.mobilePhone ?? getCurrentDriverApplication()?.personal?.mobilePhone ?? "") : "",
+    gender: initialStep === "documents" ? (getCurrentDriverApplication()?.personal?.gender ?? "") : "",
+    address: initialStep === "documents" ? (getCurrentDriverApplication()?.personal?.residentialAddress ?? "") : "",
+    city: initialStep === "documents" ? (getCurrentDriverApplication()?.personal?.city ?? "") : "",
+    province: initialStep === "documents" ? (getCurrentDriverApplication()?.personal?.province ?? "Quebec") : "Quebec",
+    postalCode: initialStep === "documents" ? (getCurrentDriverApplication()?.personal?.postalCode ?? "") : "",
+  });
   const [docFiles, setDocFiles] = useState<DocFiles>({
     transport_licence: null, fleet_insurance: null, taxi_registration: null, mechanical_inspection: null,
   });
-
-  // Restore session on mount
-  useEffect(() => {
-    const existingSession = readSession();
-    if (!existingSession) return;
-    const app = getCurrentDriverApplication();
-    if (!app) { window.localStorage.removeItem(SESSION_KEY); return; }
-    setSession(existingSession);
-    if (app.status === "submitted" || app.status === "under_review" || app.status === "approved" || app.status === "pending_verification") {
-      setStep("success"); return;
-    }
-    const hasPersonal = (app.personal?.city ?? "") !== "" || (app.personal?.residentialAddress ?? "") !== "";
-    if (hasPersonal) {
-      setPersonalForm({
-        phone: app.account?.mobilePhone ?? app.personal?.mobilePhone ?? "",
-        gender: app.personal?.gender ?? "",
-        address: app.personal?.residentialAddress ?? "",
-        city: app.personal?.city ?? "",
-        province: app.personal?.province ?? "Quebec",
-        postalCode: app.personal?.postalCode ?? "",
-      });
-      setStep("documents");
-    } else { setStep("personal"); }
-  }, []);
 
   // Register
   const handleRegister = async (e: React.FormEvent) => {
@@ -116,7 +103,6 @@ export default function DriverRegisterPage() {
         termsAccepted: true, privacyAccepted: true, agreementAccepted: true,
       });
       if (!result.ok) { setError(result.message); return; }
-      verifyDriverEmail(regForm.email);
       const newSession: DriverSession = { email: regForm.email, firstName: regForm.firstName, lastName: regForm.lastName };
       writeSession(newSession); setSession(newSession); setStep("personal");
     } catch (err) { setError(err instanceof Error ? err.message : "Registration failed."); }
@@ -127,28 +113,24 @@ export default function DriverRegisterPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); setError(null);
     if (!loginForm.email || !loginForm.password) { setError("Please enter your email and password."); return; }
+    if (!hasSupabaseConfig() || !supabase) {
+      setError("Supabase is not configured yet. Add your project URL and anon key to continue.");
+      return;
+    }
     setLoading(true);
     try {
       const loginEmail = loginForm.email.trim().toLowerCase();
-      let firstName = ""; let lastName = ""; let authenticated = false;
-      if (hasSupabaseConfig()) {
-        const { data, error: authError } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginForm.password });
-        if (!authError && data.user) {
-          firstName = (data.user.user_metadata?.first_name as string | undefined) ?? "";
-          lastName = (data.user.user_metadata?.last_name as string | undefined) ?? "";
-          authenticated = true;
-        }
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginForm.password });
+      if (authError || !data.user) {
+        setError("Invalid email or password.");
+        return;
       }
-      if (!authenticated) {
-        const raw = typeof window !== "undefined" ? window.localStorage.getItem("taxi_logicmoov_driver_application") : null;
-        const drafts = raw ? (JSON.parse(raw) as Array<Record<string, unknown>>) : [];
-        const hash = await hashPassword(loginForm.password);
-        const match = drafts.find((d) => String(d.email ?? "").toLowerCase() === loginEmail && d.passwordHash === hash);
-        if (!match) { setError("Invalid email or password."); return; }
-        firstName = String(match.firstName ?? ""); lastName = String(match.lastName ?? "");
-      }
+
+      const firstName = (data.user.user_metadata?.first_name as string | undefined) ?? "";
+      const lastName = (data.user.user_metadata?.last_name as string | undefined) ?? "";
       const newSession: DriverSession = { email: loginEmail, firstName, lastName };
       writeSession(newSession); setSession(newSession);
+
       const app = getCurrentDriverApplication();
       if (app && (app.status === "submitted" || app.status === "under_review" || app.status === "approved" || app.status === "pending_verification")) {
         setStep("success");

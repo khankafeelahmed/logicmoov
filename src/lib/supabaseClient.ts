@@ -402,6 +402,12 @@ const fallbackSupabaseClient = () => {
   };
 };
 
+export function assertSupabaseConfigured(): asserts value is true {
+  if (!hasSupabaseConfig()) {
+    throw new Error("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY before continuing.");
+  }
+}
+
 export const supabase =
   supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey, {
@@ -411,4 +417,4 @@ export const supabase =
           detectSessionInUrl: true,
         },
       })
-    : (fallbackSupabaseClient() as any);
+    : null;
