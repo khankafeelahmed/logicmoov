@@ -147,7 +147,14 @@ export async function saveDriverRecord(payload: Record<string, unknown>): Promis
             .eq("id", existingRows[0].id)
             .select("*")
             .single();
-          if (!error && data) return { data, error: null };
+          if (!error && data) {
+            // Mirror to localStorage so the admin portal always sees this driver
+            const localDrivers = readLocalList<Record<string, unknown>>(DRIVER_STORAGE_KEY);
+            const localIdx = localDrivers.findIndex((d) => String(d.email ?? "") === String(payload.email ?? ""));
+            if (localIdx >= 0) { localDrivers[localIdx] = { ...localDrivers[localIdx], ...data }; writeLocalList(DRIVER_STORAGE_KEY, localDrivers); }
+            else { writeLocalList(DRIVER_STORAGE_KEY, [...localDrivers, data]); }
+            return { data, error: null };
+          }
         }
       }
 
@@ -158,6 +165,11 @@ export async function saveDriverRecord(payload: Record<string, unknown>): Promis
         .single();
 
       if (!error && data) {
+        // Mirror to localStorage so the admin portal always sees this driver
+        const localDrivers = readLocalList<Record<string, unknown>>(DRIVER_STORAGE_KEY);
+        const localIdx = localDrivers.findIndex((d) => String(d.email ?? "") === String(payload.email ?? ""));
+        if (localIdx >= 0) { localDrivers[localIdx] = { ...localDrivers[localIdx], ...data }; writeLocalList(DRIVER_STORAGE_KEY, localDrivers); }
+        else { writeLocalList(DRIVER_STORAGE_KEY, [...localDrivers, data]); }
         return { data, error: null };
       }
     }
