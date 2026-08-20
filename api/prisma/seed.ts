@@ -59,19 +59,26 @@ async function main() {
     },
   });
 
-  // Admin user
+  // Admin user: keep the canonical app email while accepting the legacy alias.
   const adminPassword = await bcrypt.hash("LogicMoov@786", 10);
-  await prisma.user.upsert({
-    where: { email: "admin@taximovqc.ca" },
-    update: {},
-    create: {
-      email: "admin@taximovqc.ca",
-      passwordHash: adminPassword,
-      fullName: "TAXIMOVQC Admin",
-      role: "ADMIN",
-      locale: "fr",
-    },
-  });
+  for (const adminEmail of ["admin@logicmoov.ca", "admin@taximovqc.ca"]) {
+    await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: {
+        passwordHash: adminPassword,
+        fullName: "LogicMoov Admin",
+        role: "ADMIN",
+        locale: "en",
+      },
+      create: {
+        email: adminEmail,
+        passwordHash: adminPassword,
+        fullName: "LogicMoov Admin",
+        role: "ADMIN",
+        locale: "en",
+      },
+    });
+  }
 
   // Sample driver + vehicle
   const driverPassword = await bcrypt.hash("Driver1234!", 10);

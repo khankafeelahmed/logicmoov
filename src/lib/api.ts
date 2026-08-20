@@ -2,8 +2,6 @@
  * Thin client for the Taxi LogicMoov backend API.
  * Base URL is configurable via NEXT_PUBLIC_API_URL.
  */
-import { getDriverAccounts } from "@/lib/driverAuth";
-import { listDriversFromStore, listVehiclesFromStore } from "@/lib/supabaseClient";
 
 const DEFAULT_LOCAL_API_URL = "http://localhost:4000/api/v1";
 const DEFAULT_PROD_API_URL = "/api/v1";
@@ -50,94 +48,6 @@ export const API_BASE_URL = resolveApiBaseUrl();
 
 const LOCAL_ADMIN_EMAIL = "admin@logicmoov.ca";
 const LOCAL_ADMIN_PASSWORD = "LogicMoov@786";
-const LOCAL_DRIVER_KEY = "taxi_logicmoov_local_drivers";
-const LOCAL_VEHICLE_KEY = "taxi_logicmoov_local_vehicles";
-
-function readLocalDriverRows() {
-  if (typeof window === "undefined") return [] as Array<Record<string, unknown>>;
-  const raw = window.localStorage.getItem(LOCAL_DRIVER_KEY);
-  if (!raw) return [] as Array<Record<string, unknown>>;
-
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [] as Array<Record<string, unknown>>;
-  }
-}
-
-function readLocalVehicleRows() {
-  if (typeof window === "undefined") return [] as Array<Record<string, unknown>>;
-  const raw = window.localStorage.getItem(LOCAL_VEHICLE_KEY);
-  if (!raw) return [] as Array<Record<string, unknown>>;
-
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [] as Array<Record<string, unknown>>;
-  }
-}
-
-function mapLocalDriversToAdminDriverList(): Driver[] {
-  const rows = readLocalDriverRows();
-  const vehicles = readLocalVehicleRows();
-
-  return rows.map((row) => {
-    const fullName = String(row.full_name ?? row.fullName ?? "Unknown driver");
-    const email = String(row.email ?? "");
-    const phone = typeof row.whatsapp_number === "string" ? row.whatsapp_number : null;
-    const rowVehicle = vehicles.find((vehicle) => vehicle.driver_id === row.id);
-    const driverPhotoUrl = typeof row.photo_url === "string" && row.photo_url ? row.photo_url : null;
-    const vehiclePhotoUrls = Array.isArray(rowVehicle?.photo_urls)
-      ? rowVehicle.photo_urls.map((item: unknown) => String(item)).filter(Boolean)
-      : [];
-    const vehiclePhotoUrl = vehiclePhotoUrls[0] ?? (typeof rowVehicle?.photo_url === "string" ? rowVehicle.photo_url : null);
-    const languages = Array.isArray(row.languages)
-      ? row.languages.map((item: unknown) => String(item)).filter(Boolean)
-      : typeof row.languages === "string"
-        ? row.languages.split(",").map((item: string) => item.trim()).filter(Boolean)
-        : [];
-
-    return {
-      id: String(row.id ?? crypto.randomUUID()),
-      status: "AVAILABLE",
-      rating: 4.8,
-      licenseNumber: String(row.license_number ?? "—"),
-      licenseExpiry: typeof row.license_expiry === "string" ? row.license_expiry : null,
-      languages,
-      photoUrl: driverPhotoUrl,
-      user: {
-        id: String(row.id ?? crypto.randomUUID()),
-        fullName,
-        email,
-        phone,
-      },
-      vehicle: rowVehicle
-        ? {
-            category: String(rowVehicle.vehicle_type ?? "SEDAN") as VehicleCategory,
-            make: String(rowVehicle.brand ?? "Unknown"),
-            model: String(rowVehicle.model ?? "Model"),
-            plate: String(rowVehicle.plate_number ?? "—"),
-            year: rowVehicle.year !== undefined && rowVehicle.year !== null ? Number(rowVehicle.year) : null,
-            color: typeof rowVehicle.color === "string" ? rowVehicle.color : null,
-            seatCapacity: rowVehicle.seat_capacity !== undefined && rowVehicle.seat_capacity !== null ? Number(rowVehicle.seat_capacity) : null,
-            luggageCapacity: rowVehicle.luggage_capacity !== undefined && rowVehicle.luggage_capacity !== null ? Number(rowVehicle.luggage_capacity) : null,
-            electric: Boolean(rowVehicle.electric),
-            features: Array.isArray(rowVehicle.inclusions)
-              ? rowVehicle.inclusions.map((item: unknown) => String(item)).filter(Boolean)
-              : [],
-            photoUrl: vehiclePhotoUrl,
-            photoUrls: vehiclePhotoUrls.length > 0
-              ? vehiclePhotoUrls
-              : vehiclePhotoUrl
-                ? [vehiclePhotoUrl]
-                : [],
-          }
-        : null,
-    };
-  });
-}
 
 /** Origin of the API server (without the /api/v1 path) — used for Socket.IO. */
 export const API_ORIGIN = API_BASE_URL.replace(/\/api\/v1\/?$/, "");
@@ -413,110 +323,110 @@ export const api = {
   },
 
   async listDrivers(token: string) {
-    try {
-      return await request<{ drivers: Driver[] }>("/drivers", { token });
-    } catch {
-      const rows = await listDriversFromStore();
-      const vehicles = await listVehiclesFromStore();
-      const accounts = getDriverAccounts();
-      const matchedAccountIds = new Set<string>();
-      const driversFromProfiles = rows.map((row) => {
-        const fullName = String(row.full_name ?? row.fullName ?? "Unknown driver");
-        const email = String(row.email ?? "");
-        const phone = typeof row.whatsapp_number === "string" ? row.whatsapp_number : null;
-        const rowVehicle = vehicles.find((vehicle) => String(vehicle.driver_id ?? "") === String(row.id));
-        const account = accounts.find(
-          (entry) =>
-            entry.email.toLowerCase() === email.toLowerCase() ||
-            entry.fullName.toLowerCase() === fullName.toLowerCase(),
-        );
-        if (account) {
-          matchedAccountIds.add(account.id);
-        }
-        const approvalStatus = account?.status === "pending"
-          ? "PENDING"
-          : account?.status === "suspended"
-            ? "OFFLINE"
+    void token;
+    const response = await fetch("/api/admin/list-drivers", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    const payload = (await response.json().catch(() => null)) as {
+      ok?: boolean;
+      error?: string;
+      drivers?: Array<Record<string, unknown>>;
+      vehicles?: Array<Record<string, unknown>>;
+      documents?: Array<Record<string, unknown>>;
+    } | null;
+
+    if (!response.ok || !payload || payload.ok === false) {
+      throw new ApiError(response.status || 500, payload?.error ?? "Unable to load drivers.");
+    }
+
+    const rows = Array.isArray(payload.drivers) ? payload.drivers : [];
+    const vehicles = Array.isArray(payload.vehicles) ? payload.vehicles : [];
+
+    const drivers = rows.map((row) => {
+      const firstName = typeof row.first_name === "string" ? row.first_name.trim() : "";
+      const lastName = typeof row.last_name === "string" ? row.last_name.trim() : "";
+      const fullName =
+        typeof row.full_name === "string" && row.full_name.trim()
+          ? row.full_name.trim()
+          : typeof row.fullName === "string" && row.fullName.trim()
+            ? row.fullName.trim()
+            : [firstName, lastName].filter(Boolean).join(" ") || "Unknown driver";
+      const email = String(row.email ?? "");
+      const loginId = typeof row.login_id === "string" && row.login_id.trim() ? row.login_id.trim() : null;
+      const phone =
+        typeof row.whatsapp_number === "string" && row.whatsapp_number.trim()
+          ? row.whatsapp_number.trim()
+          : typeof row.phone === "string" && row.phone.trim() && row.phone.trim() !== "N/A"
+            ? row.phone.trim()
+            : null;
+      const rowVehicle = vehicles.find((vehicle) => String(vehicle.driver_id ?? "") === String(row.id));
+      const driverStatus = String(row.status ?? row.application_status ?? "enabled");
+      const status = driverStatus === "pending"
+        ? "PENDING"
+        : driverStatus === "suspended" || driverStatus === "OFFLINE"
+          ? "OFFLINE"
+          : driverStatus === "BUSY"
+            ? "BUSY"
             : "AVAILABLE";
 
-        const driverPhotoUrl = typeof row.photo_url === "string" && row.photo_url ? row.photo_url : null;
-        const vehiclePhotoUrls = Array.isArray(rowVehicle?.photo_urls)
-          ? rowVehicle.photo_urls.map((item: unknown) => String(item)).filter(Boolean)
+      const driverPhotoUrl = typeof row.photo_url === "string" && row.photo_url ? row.photo_url : null;
+      const vehiclePhotoUrls = Array.isArray(rowVehicle?.photo_urls)
+        ? rowVehicle.photo_urls.map((item: unknown) => String(item)).filter(Boolean)
+        : [];
+      const vehiclePhotoUrl = vehiclePhotoUrls[0] ?? (typeof rowVehicle?.photo_url === "string" ? rowVehicle.photo_url : null);
+      const languages = Array.isArray(row.languages)
+        ? row.languages.map((item: unknown) => String(item)).filter(Boolean)
+        : typeof row.languages === "string"
+          ? row.languages.split(",").map((item: string) => item.trim()).filter(Boolean)
           : [];
-        const vehiclePhotoUrl = vehiclePhotoUrls[0] ?? (typeof rowVehicle?.photo_url === "string" ? rowVehicle.photo_url : null);
-        const languages = Array.isArray(row.languages)
-          ? row.languages.map((item: unknown) => String(item)).filter(Boolean)
-          : typeof row.languages === "string"
-            ? row.languages.split(",").map((item: string) => item.trim()).filter(Boolean)
-            : [];
 
-        return {
+      return {
+        id: String(row.id ?? crypto.randomUUID()),
+        status,
+        rating: 4.8,
+        licenseNumber: String(row.license_number ?? "—"),
+        licenseExpiry: typeof row.license_expiry === "string" ? row.license_expiry : null,
+        languages,
+        photoUrl: driverPhotoUrl,
+        user: {
           id: String(row.id ?? crypto.randomUUID()),
-          status: approvalStatus,
-          rating: 4.8,
-          licenseNumber: String(row.license_number ?? "—"),
-          licenseExpiry: typeof row.license_expiry === "string" ? row.license_expiry : null,
-          languages,
-          photoUrl: driverPhotoUrl,
-          user: {
-            id: String(row.id ?? crypto.randomUUID()),
-            fullName,
-            email,
-            phone,
-          },
-          vehicle: rowVehicle
-            ? {
-                category: String(rowVehicle.vehicle_type ?? "SEDAN") as VehicleCategory,
-                make: String(rowVehicle.brand ?? "Unknown"),
-                model: String(rowVehicle.model ?? "Model"),
-                plate: String(rowVehicle.plate_number ?? "—"),
-                year: rowVehicle.year !== undefined && rowVehicle.year !== null ? Number(rowVehicle.year) : null,
-                color: typeof rowVehicle.color === "string" ? rowVehicle.color : null,
-                seatCapacity: rowVehicle.seat_capacity !== undefined && rowVehicle.seat_capacity !== null ? Number(rowVehicle.seat_capacity) : null,
-                luggageCapacity: rowVehicle.luggage_capacity !== undefined && rowVehicle.luggage_capacity !== null ? Number(rowVehicle.luggage_capacity) : null,
-                electric: Boolean(rowVehicle.electric),
-                features: Array.isArray(rowVehicle.inclusions)
-                  ? rowVehicle.inclusions.map((item: unknown) => String(item)).filter(Boolean)
+          firstName,
+          lastName,
+          loginId,
+          fullName,
+          email,
+          phone,
+        },
+        vehicle: rowVehicle
+          ? {
+              category: String(rowVehicle.vehicle_type ?? "SEDAN") as VehicleCategory,
+              make: String(rowVehicle.brand ?? "Unknown"),
+              model: String(rowVehicle.model ?? "Model"),
+              plate: String(rowVehicle.plate_number ?? "—"),
+              year: rowVehicle.year !== undefined && rowVehicle.year !== null ? Number(rowVehicle.year) : null,
+              color: typeof rowVehicle.color === "string" ? rowVehicle.color : null,
+              seatCapacity: rowVehicle.seat_capacity !== undefined && rowVehicle.seat_capacity !== null ? Number(rowVehicle.seat_capacity) : null,
+              luggageCapacity: rowVehicle.luggage_capacity !== undefined && rowVehicle.luggage_capacity !== null ? Number(rowVehicle.luggage_capacity) : null,
+              electric: Boolean(rowVehicle.electric),
+              features: Array.isArray(rowVehicle.inclusions)
+                ? rowVehicle.inclusions.map((item: unknown) => String(item)).filter(Boolean)
+                : [],
+              photoUrl: vehiclePhotoUrl || null,
+              photoUrls: vehiclePhotoUrls.length > 0
+                ? vehiclePhotoUrls
+                : vehiclePhotoUrl
+                  ? [vehiclePhotoUrl]
                   : [],
-                photoUrl: vehiclePhotoUrl || null,
-                photoUrls: vehiclePhotoUrls.length > 0
-                  ? vehiclePhotoUrls
-                  : vehiclePhotoUrl
-                    ? [vehiclePhotoUrl]
-                    : [],
-              }
-            : null,
-        } satisfies Driver;
-      });
+            }
+          : null,
+      } satisfies Driver;
+    });
 
-      const accountOnlyDrivers = accounts
-        .filter((account) => !matchedAccountIds.has(account.id))
-        .map((account) => {
-          const status = account.status === "pending"
-            ? "PENDING"
-            : account.status === "suspended"
-              ? "OFFLINE"
-              : "AVAILABLE";
-          return {
-            id: account.id,
-            status,
-            rating: 4.8,
-            licenseNumber: "—",
-            licenseExpiry: null,
-            languages: [],
-            photoUrl: null,
-            user: {
-              id: account.id,
-              fullName: account.fullName,
-              email: account.email,
-              phone: account.phone || null,
-            },
-            vehicle: null,
-          } satisfies Driver;
-        });
-
-      return { drivers: [...driversFromProfiles, ...accountOnlyDrivers] };
-    }
+    return { drivers };
   },
 
   listPricingRules() {
@@ -645,7 +555,15 @@ export interface Driver {
   licenseExpiry?: string | null;
   languages?: string[];
   photoUrl?: string | null;
-  user: { id: string; fullName: string; email: string; phone: string | null };
+  user: {
+    id: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    loginId?: string | null;
+    fullName: string;
+    email: string;
+    phone: string | null;
+  };
   vehicle?: {
     category: VehicleCategory;
     make: string;

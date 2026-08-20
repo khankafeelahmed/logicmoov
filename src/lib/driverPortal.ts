@@ -207,26 +207,40 @@ export async function loginDriverAccount(loginId: string, password: string): Pro
     throw new Error("Invalid Login ID or Password.");
   }
 
-  const { data: driver, error: driverError } = await supabase
-    .from("drivers")
-    .select("*")
-    .eq("login_id", normalizedLoginId)
-    .maybeSingle();
+  const response = await fetch("/api/driver/resolve-login", {
+   method: "POST",
+   headers: {
+     "Content-Type": "application/json",
+   },
+   body: JSON.stringify({ loginId: normalizedLoginId }),
+  });
 
-  if (driverError) {
-   if (isMissingLoginIdColumnError(driverError)) {
+  const payload = (await response.json().catch(() => null)) as {
+   ok?: boolean;
+   error?: string;
+   driver?: {
+     id?: string | number;
+     login_id?: string | null;
+     email?: string | null;
+     first_name?: string | null;
+     last_name?: string | null;
+     phone?: string | null;
+     application_status?: string | null;
+   };
+  } | null;
+
+  if (!response.ok || !payload?.ok || !payload.driver) {
+   const message = payload?.error || "Invalid Login ID or Password.";
+   if (message.includes("login_id") && message.includes("does not exist")) {
      throw new Error(DRIVER_LOGIN_ID_SCHEMA_ERROR);
    }
    throw new Error("Invalid Login ID or Password.");
   }
 
-  if (!driver) {
-   throw new Error("Invalid Login ID or Password.");
-  }
-
+  const driver = payload.driver;
   const authEmail = String(driver.email || "");
   if (!authEmail) {
-    throw new Error("Invalid Login ID or Password.");
+   throw new Error("Invalid Login ID or Password.");
   }
 
   const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -255,7 +269,18 @@ export async function loginDriverAccount(loginId: string, password: string): Pro
 }
 
 export async function logoutDriverAccount(): Promise<void> {
-  await supabase.auth.signOut().catch(() => undefined);
+  // Logout must end the active session only. It must never delete or mutate the
+  // persisted driver account record in the database or local storage.
+  const hadSession = Boolean(getDriverPortalSession());
+
+  if (hadSession) {
+    await supabase.auth.signOut().catch(() => undefined);
+    clearDriverPortalSession();
+    return;
+  }
+
+  // Ensure the portal session is cleared even if the user had already signed out
+  // or the browser storage was left in a stale state.
   clearDriverPortalSession();
 }
 
