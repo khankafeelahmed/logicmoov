@@ -70,7 +70,9 @@ export async function GET(request: Request) {
     }
 
     const mappedDrivers = (drivers ?? []).map((driver) => {
-      const fullName = `${String(driver.first_name ?? "").trim()} ${String(driver.last_name ?? "").trim()}`.trim() || "Unknown driver";
+      const firstName = String(driver.first_name ?? "").trim();
+      const lastName = String(driver.last_name ?? "").trim();
+      const fullName = `${firstName} ${lastName}`.trim() || "Unknown driver";
       const vehicle = vehiclesByDriver.get(String(driver.id));
       const vehiclePhotoUrls = Array.isArray(vehicle?.photo_urls)
         ? vehicle.photo_urls
@@ -91,6 +93,8 @@ export async function GET(request: Request) {
         photoUrl: typeof driver.profile_photo_url === "string" && driver.profile_photo_url ? driver.profile_photo_url : null,
         user: {
           id: typeof driver.user_id === "string" && driver.user_id ? String(driver.user_id) : String(driver.id),
+          firstName,
+          lastName,
           fullName,
           email: String(driver.email ?? ""),
           phone: typeof driver.phone === "string" && driver.phone ? driver.phone : null,

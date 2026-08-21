@@ -24,7 +24,14 @@ export default function DriverDashboardPage() {
   const [draft, setDraft] = useState<DriverApplicationDraft | null>(null);
 
   useEffect(() => {
-    setDraft(getCurrentDriverApplication());
+    // getCurrentDriverApplication() reads localStorage, which differs between the server-rendered
+    // pass (no window) and the client — deferring the read/set avoids a hydration mismatch while
+    // still not calling setState synchronously within the effect body itself.
+    const timeoutId = window.setTimeout(() => {
+      setDraft(getCurrentDriverApplication());
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const summary = buildDriverStatusSummary(draft);
@@ -80,6 +87,16 @@ export default function DriverDashboardPage() {
           </div>
         </div>
 
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="text-lg font-bold text-slate-800">Driver Profile</h3>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <ProfileField label="First Name" value={draft?.firstName} />
+            <ProfileField label="Last Name" value={draft?.lastName} />
+            <ProfileField label="Email" value={draft?.personal?.email || draft?.account?.email || draft?.email} />
+            <ProfileField label="Phone Number" value={draft?.account?.mobilePhone || draft?.personal?.mobilePhone} />
+          </div>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Status" value={summary.label} tone={summary.tone} />
           <StatCard label="Vehicle" value={draft?.vehicle?.category || "Not added"} tone="bg-slate-100 text-slate-700" />
@@ -127,6 +144,15 @@ function StatCard({ label, value, tone }: { label: string; value: string; tone: 
     <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
       <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-500">{label}</p>
       <p className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${tone}`}>{value}</p>
+    </div>
+  );
+}
+
+function ProfileField({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-[#f8fafc] p-4">
+      <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-500">{label}</p>
+      <p className="mt-2 text-sm font-semibold text-slate-800">{value || "Not provided"}</p>
     </div>
   );
 }

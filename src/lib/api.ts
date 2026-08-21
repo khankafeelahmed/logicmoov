@@ -469,7 +469,7 @@ export interface Driver {
   licenseExpiry?: string | null;
   languages?: string[];
   photoUrl?: string | null;
-  user: { id: string; fullName: string; email: string; phone: string | null };
+  user: { id: string; firstName: string; lastName: string; fullName: string; email: string; phone: string | null };
   vehicle?: {
     category: VehicleCategory;
     make: string;

@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey =
@@ -134,27 +134,38 @@ export async function saveDriverRecord(payload: Record<string, unknown>): Promis
       if (!sanitized.id && typeof crypto !== "undefined" && "randomUUID" in crypto) {
         sanitized.id = crypto.randomUUID();
       }
+
       if (sanitized.email && typeof sanitized.email === "string") {
         const { data: existingRows, error: lookupError } = await supabase
           .from("drivers")
           .select("id")
           .eq("email", sanitized.email)
           .limit(1);
-        if (!lookupError && Array.isArray(existingRows) && existingRows.length > 0) {
+
+        if (lookupError) {
+          // Supabase is configured and we have an authenticated user — a real DB error here
+          // must be reported, not silently papered over with a local-only fallback record.
+          return { data: null, error: new Error(lookupError.message || "Unable to check for an existing driver record.") };
+        }
+
+        if (Array.isArray(existingRows) && existingRows.length > 0) {
           const { data, error } = await supabase
             .from("drivers")
             .update(sanitized)
             .eq("id", existingRows[0].id)
             .select("*")
             .single();
-          if (!error && data) {
-            // Mirror to localStorage so the admin portal always sees this driver
-            const localDrivers = readLocalList<Record<string, unknown>>(DRIVER_STORAGE_KEY);
-            const localIdx = localDrivers.findIndex((d) => String(d.email ?? "") === String(payload.email ?? ""));
-            if (localIdx >= 0) { localDrivers[localIdx] = { ...localDrivers[localIdx], ...data }; writeLocalList(DRIVER_STORAGE_KEY, localDrivers); }
-            else { writeLocalList(DRIVER_STORAGE_KEY, [...localDrivers, data]); }
-            return { data, error: null };
+
+          if (error) {
+            return { data: null, error: new Error(error.message || "Unable to update your driver record.") };
           }
+
+          // Mirror to localStorage as a best-effort cache — the Supabase write already succeeded.
+          const localDrivers = readLocalList<Record<string, unknown>>(DRIVER_STORAGE_KEY);
+          const localIdx = localDrivers.findIndex((d) => String(d.email ?? "") === String(payload.email ?? ""));
+          if (localIdx >= 0) { localDrivers[localIdx] = { ...localDrivers[localIdx], ...data }; writeLocalList(DRIVER_STORAGE_KEY, localDrivers); }
+          else { writeLocalList(DRIVER_STORAGE_KEY, [...localDrivers, data]); }
+          return { data, error: null };
         }
       }
 
@@ -164,17 +175,21 @@ export async function saveDriverRecord(payload: Record<string, unknown>): Promis
         .select("*")
         .single();
 
-      if (!error && data) {
-        // Mirror to localStorage so the admin portal always sees this driver
-        const localDrivers = readLocalList<Record<string, unknown>>(DRIVER_STORAGE_KEY);
-        const localIdx = localDrivers.findIndex((d) => String(d.email ?? "") === String(payload.email ?? ""));
-        if (localIdx >= 0) { localDrivers[localIdx] = { ...localDrivers[localIdx], ...data }; writeLocalList(DRIVER_STORAGE_KEY, localDrivers); }
-        else { writeLocalList(DRIVER_STORAGE_KEY, [...localDrivers, data]); }
-        return { data, error: null };
+      if (error) {
+        return { data: null, error: new Error(error.message || "Unable to save your driver record.") };
       }
+
+      // Mirror to localStorage as a best-effort cache — the Supabase write already succeeded.
+      const localDrivers = readLocalList<Record<string, unknown>>(DRIVER_STORAGE_KEY);
+      const localIdx = localDrivers.findIndex((d) => String(d.email ?? "") === String(payload.email ?? ""));
+      if (localIdx >= 0) { localDrivers[localIdx] = { ...localDrivers[localIdx], ...data }; writeLocalList(DRIVER_STORAGE_KEY, localDrivers); }
+      else { writeLocalList(DRIVER_STORAGE_KEY, [...localDrivers, data]); }
+      return { data, error: null };
     }
   }
 
+  // Only reached when Supabase isn't configured at all (local/offline dev) — fall back to a
+  // local-only record. This must never be reached as a way of masking a real Supabase error.
   const item = {
     ...payload,
     status: payload.status ?? "pending",
@@ -402,19 +417,35 @@ const fallbackSupabaseClient = () => {
   };
 };
 
-export function assertSupabaseConfigured(): asserts value is true {
+export function assertSupabaseConfigured(): void {
   if (!hasSupabaseConfig()) {
     throw new Error("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY before continuing.");
   }
 }
 
-export const supabase =
-  supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-        },
-      })
-    : null;
+// Every real call site here always has real config in practice (hasSupabaseConfig() is true
+// whenever NEXT_PUBLIC_SUPABASE_URL/ANON_KEY are set, which is the normal/expected case).
+// When they're genuinely missing, fail loudly on first real use with a clear message instead
+// of returning null and letting every one of the ~60 call sites crash with an unhelpful
+// "Cannot read properties of null" — and instead of silently degrading to fake local behavior.
+function createConfiguredSupabaseClient(): SupabaseClient {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return new Proxy({} as SupabaseClient, {
+      get() {
+        throw new Error(
+          "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) before using the Supabase client.",
+        );
+      },
+    });
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  });
+}
+
+export const supabase: SupabaseClient = createConfiguredSupabaseClient();

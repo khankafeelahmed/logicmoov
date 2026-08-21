@@ -341,7 +341,7 @@ export default function AdminDriversPage() {
                           </div>
                           <div className="space-y-1">
                             <div className="text-[11px] font-medium text-ink-500">
-                              {d.user.fullName && d.user.fullName !== "Unknown driver" ? d.user.fullName : "Driver login ID"}
+                              {d.user.email || "Driver login ID"}
                             </div>
                             <div className="text-sm font-semibold text-ink-900">
                               {d.user.fullName && d.user.fullName !== "Unknown driver" ? d.user.fullName : d.user.email || "—"}
@@ -364,6 +364,30 @@ export default function AdminDriversPage() {
                         >
                           Delete
                         </button>
+                      </div>
+
+                      <div className="mt-3 rounded-xl border border-ink-100 bg-ink-50 p-2.5">
+                        <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-400">
+                          Driver profile
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-ink-700">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wide text-ink-400">First name</div>
+                            <div className="truncate font-medium">{d.user.firstName || "—"}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wide text-ink-400">Last name</div>
+                            <div className="truncate font-medium">{d.user.lastName || "—"}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wide text-ink-400">Email</div>
+                            <div className="truncate font-medium">{d.user.email || "—"}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wide text-ink-400">Phone number</div>
+                            <div className="truncate font-medium">{d.user.phone || "—"}</div>
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-4 align-top text-ink-600">

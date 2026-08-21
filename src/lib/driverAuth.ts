@@ -14,7 +14,13 @@ export type DriverPortalAccount = {
 };
 
 const DRIVER_ACCOUNTS_KEY = "taxi_logicmoov_driver_accounts";
-const DRIVER_SESSION_KEY = "taxi_logicmoov_driver_session";
+// NOTE: this legacy local-only account/session system is not used by any current driver-portal
+// page (only getDriverAccounts()/deleteDriverAccountByIdentity()/updateDriverApprovalStatus()
+// below are still called, by the admin drivers page). The key is deliberately named differently
+// from src/lib/driverPortal.ts's DRIVER_SESSION_KEY ("taxi_logicmoov_driver_session", the one
+// real canonical key the login/register/dashboard/documents pages actually share) so this dead
+// code can never again collide with and silently corrupt the real driver session.
+const DRIVER_SESSION_KEY = "taxi_logicmoov_legacy_driver_accounts_session";
 const LOCAL_DRIVER_PROFILES_KEY = "taxi_logicmoov_local_drivers";
 
 function readAccounts(): DriverPortalAccount[] {

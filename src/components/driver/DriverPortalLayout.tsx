@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ArrowUpRight, Car, CheckCircle2, ClipboardList, FileCheck2, ShieldCheck, UserCircle2, WalletCards } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowUpRight, Car, ClipboardList, FileCheck2, LogOut, ShieldCheck, UserCircle2 } from "lucide-react";
+import { getDriverPortalSession, logoutDriverAccount } from "@/lib/driverPortal";
 
 interface DriverPortalLayoutProps {
   locale: string;
@@ -12,19 +14,39 @@ interface DriverPortalLayoutProps {
   children: React.ReactNode;
 }
 
+// Only these two are shown in the sidebar for now. Profile/Vehicle/Application/Status
+// pages still exist and are still reachable by direct link — just not in the nav.
 const items = [
   { id: "dashboard", label: "Dashboard", href: "/driver/dashboard" },
-  { id: "profile", label: "Profile", href: "/driver/profile" },
-  { id: "vehicle", label: "Vehicle", href: "/driver/vehicle" },
   { id: "documents", label: "Documents & Compliance", href: "/driver/documents" },
-  { id: "application", label: "Application", href: "/driver/application" },
-  { id: "status", label: "Status", href: "/driver/status" },
 ] as const;
 
 export default function DriverPortalLayout({ locale, active, title, subtitle, children }: DriverPortalLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const pathLocale = pathname?.split("/")[1] || locale;
   const prefix = `/${pathLocale}`;
+  const hasActiveSession = Boolean(getDriverPortalSession()?.email);
+
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    setLogoutError(null);
+    try {
+      const result = await logoutDriverAccount();
+      if (!result.ok) {
+        // The local session is still cleared at this point even if the remote call failed,
+        // so it's safe (and correct) to redirect either way — just let the driver know.
+        setLogoutError(result.message || "There was a problem signing out, but you have been logged out on this device.");
+      }
+      router.push(`${prefix}/driver/login`);
+    } catch (err) {
+      setLogoutError(err instanceof Error ? err.message : "Unable to sign out. Please try again.");
+      setLoggingOut(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f3efe8] text-[#111827]">
@@ -39,16 +61,18 @@ export default function DriverPortalLayout({ locale, active, title, subtitle, ch
               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">Driver Portal</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Link href={`/${pathLocale}/driver/login`} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              <UserCircle2 className="h-4 w-4" />
-              Login
-            </Link>
-            <Link href={`/${pathLocale}/driver/register`} className="inline-flex items-center gap-2 rounded-full bg-[#f5c84d] px-4 py-2 text-sm font-semibold text-[#111827] shadow-sm hover:bg-[#f0b72b]">
-              <ArrowUpRight className="h-4 w-4" />
-              Register
-            </Link>
-          </div>
+          {!hasActiveSession && (
+            <div className="flex items-center gap-2">
+              <Link href={`/${pathLocale}/driver/login`} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                <UserCircle2 className="h-4 w-4" />
+                Login
+              </Link>
+              <Link href={`/${pathLocale}/driver/register`} className="inline-flex items-center gap-2 rounded-full bg-[#f5c84d] px-4 py-2 text-sm font-semibold text-[#111827] shadow-sm hover:bg-[#f0b72b]">
+                <ArrowUpRight className="h-4 w-4" />
+                Register
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
@@ -63,6 +87,25 @@ export default function DriverPortalLayout({ locale, active, title, subtitle, ch
               </div>
             </div>
 
+            {hasActiveSession && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => void handleLogout()}
+                  disabled={loggingOut}
+                  className="mb-2 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <LogOut className="h-4 w-4" />
+                  {loggingOut ? "Logging out…" : "Logout"}
+                </button>
+                {logoutError && (
+                  <p className="mb-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+                    {logoutError}
+                  </p>
+                )}
+              </>
+            )}
+
             <nav className="space-y-2">
               {items.map((item) => {
                 const isActive = item.id === active;
@@ -75,11 +118,7 @@ export default function DriverPortalLayout({ locale, active, title, subtitle, ch
                     }`}
                   >
                     {item.id === "dashboard" && <ClipboardList className="h-4 w-4" />}
-                    {item.id === "profile" && <UserCircle2 className="h-4 w-4" />}
-                    {item.id === "vehicle" && <Car className="h-4 w-4" />}
                     {item.id === "documents" && <FileCheck2 className="h-4 w-4" />}
-                    {item.id === "application" && <CheckCircle2 className="h-4 w-4" />}
-                    {item.id === "status" && <WalletCards className="h-4 w-4" />}
                     {item.label}
                   </Link>
                 );

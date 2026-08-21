@@ -1,4 +1,4 @@
-import { getDriverAccounts } from "@/lib/driverAuth";
+import { clearDriverPortalSession, getDriverPortalSession } from "@/lib/driverPortal";
 import { assertSupabaseConfigured, hasSupabaseConfig, saveDriverRecord, saveVehicleRecord, supabase } from "@/lib/supabaseClient";
 
 export type DriverDocumentStatus = "pending" | "approved" | "rejected" | "expired";
@@ -275,32 +275,28 @@ export async function createDriverAccount(input: {
 
   const email = input.email.trim().toLowerCase();
   const drafts = readDrafts();
-  const existing = drafts.find((draft) => draft.email.toLowerCase() === email);
-  const adminAccounts = getDriverAccounts();
-  const activeSessionEmail =
-    typeof window !== "undefined"
-      ? (() => {
-          try {
-            const raw = window.localStorage.getItem("taxi_logicmoov_driver_session");
-            if (!raw) return "";
-            const parsed = JSON.parse(raw) as { email?: string };
-            return String(parsed.email ?? "").trim().toLowerCase();
-          } catch {
-            return "";
-          }
-        })()
-      : "";
+  const staleDrafts = drafts.filter((draft) => draft.email.toLowerCase() !== email);
 
-  const hasRealAdminAccount = adminAccounts.some((account) => account.email.toLowerCase() === email);
-  const hasActiveSessionForEmail = activeSessionEmail === email;
+  if (hasSupabaseConfig()) {
+    const { data: existingDriverRow, error: existingDriverError } = await supabase
+      .from("drivers")
+      .select("id")
+      .eq("email", email)
+      .limit(1);
 
-  // Never allow re-registration for an existing account — protects against accidental data loss
-  if (existing && (hasRealAdminAccount || hasActiveSessionForEmail)) {
-    return { ok: false, message: "An account already exists for this email. Please use the Sign In tab to continue." };
+    if (existingDriverError) {
+      // A driver row may exist even when the auth user does not (admin-created or partially-created
+      // record), so keep this as a DB-level guardrail instead of relying on local draft state.
+    }
+
+    if ((existingDriverRow ?? []).length > 0) {
+      return { ok: false, message: "An account already exists for this email. Please use the Sign In tab to continue." };
+    }
   }
 
-  if (existing) {
-    return { ok: false, message: "An account already exists for this email. Please use the Sign In tab to log in." };
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem(DRIVER_APPLICATION_KEY);
+    window.localStorage.removeItem("taxi_logicmoov_driver_session");
   }
 
   const passwordHash = await hashPassword(input.password);
@@ -350,6 +346,19 @@ export async function createDriverAccount(input: {
     });
 
     if (error) {
+      const code = String(error.code ?? "").toLowerCase();
+      const message = String(error.message ?? "").toLowerCase();
+      const isDuplicate =
+        code === "user_already_exists" ||
+        code === "email_exists" ||
+        message.includes("already registered") ||
+        message.includes("already exists") ||
+        message.includes("user already");
+
+      if (isDuplicate) {
+        return { ok: false, message: "An account already exists for this email. Please use the Sign In tab to continue." };
+      }
+
       return { ok: false, message: error.message || "Unable to create the authentication account." };
     }
 
@@ -364,56 +373,61 @@ export async function createDriverAccount(input: {
       }
     }
 
-    if (authUserId) {
-      await saveDriverRecord({
-        user_id: authUserId,
-        first_name: draft.firstName,
-        last_name: draft.lastName,
-        email: draft.email,
-        phone: draft.account?.mobilePhone || "",
-        date_of_birth: draft.personal?.dateOfBirth || null,
-        address: draft.personal?.residentialAddress || null,
-        city: draft.personal?.city || null,
-        province: draft.personal?.province || null,
-        postal_code: draft.personal?.postalCode || null,
-        driver_license_number: draft.licence?.licenceNumber || null,
-        profile_photo_url: null,
-        application_status: toDbApplicationStatus(draft.status),
-      } as Record<string, unknown>);
+    if (!authUserId) {
+      return { ok: false, message: "Unable to create the authentication account. Please try again." };
+    }
+
+    const saveResult = await saveDriverRecord({
+      user_id: authUserId,
+      first_name: draft.firstName,
+      last_name: draft.lastName,
+      email: draft.email,
+      phone: draft.account?.mobilePhone || "",
+      date_of_birth: draft.personal?.dateOfBirth || null,
+      address: draft.personal?.residentialAddress || null,
+      city: draft.personal?.city || null,
+      province: draft.personal?.province || null,
+      postal_code: draft.personal?.postalCode || null,
+      driver_license_number: draft.licence?.licenceNumber || null,
+      profile_photo_url: null,
+      application_status: toDbApplicationStatus(draft.status),
+    } as Record<string, unknown>);
+
+    // The auth account exists at this point even if the driver-row save fails below; surface
+    // that failure clearly instead of reporting success while no driver record actually exists.
+    if (saveResult.error) {
+      return {
+        ok: false,
+        message: `Your account was created, but we couldn't save your driver profile (${saveResult.error.message}). Please try signing in again, or contact support.`,
+      };
     }
   }
 
-  writeDrafts([...drafts, draft]);
+  writeDrafts([...staleDrafts, draft]);
   return { ok: true, message: "Account created successfully. You can continue to your profile and upload documents.", draft };
 }
 
 export function getCurrentDriverApplication(): DriverApplicationDraft | null {
   if (typeof window === "undefined") return null;
 
-  const rawSession = window.localStorage.getItem("taxi_logicmoov_driver_session");
-  if (!rawSession) return null;
+  const session = getDriverPortalSession();
+  if (!session) return null;
 
-  try {
-    const session = JSON.parse(rawSession) as { email?: string };
-    const email = String(session.email ?? "").trim().toLowerCase();
-    if (!email) {
-      window.localStorage.removeItem("taxi_logicmoov_driver_session");
-      return null;
-    }
-
-    const drafts = readDrafts();
-    const match = drafts.find((draft) => draft.email.toLowerCase() === email) ?? null;
-
-    if (!match) {
-      window.localStorage.removeItem("taxi_logicmoov_driver_session");
-      return null;
-    }
-
-    return match;
-  } catch {
-    window.localStorage.removeItem("taxi_logicmoov_driver_session");
+  const email = String(session.email ?? "").trim().toLowerCase();
+  if (!email) {
+    clearDriverPortalSession();
     return null;
   }
+
+  const drafts = readDrafts();
+  const match = drafts.find((draft) => draft.email.toLowerCase() === email) ?? null;
+
+  if (!match) {
+    clearDriverPortalSession();
+    return null;
+  }
+
+  return match;
 }
 
 export function getDriverApplicationByEmail(email: string): DriverApplicationDraft | null {

@@ -1,16 +1,26 @@
 import { assertSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 
 export type DriverPortalSession = {
-  userId: string;
-  driverId: string;
-  loginId: string;
+  email: string;
   firstName: string;
   lastName: string;
-  fullName: string;
-  phone: string;
-  email: string;
-  applicationStatus: string;
+  // Legacy fields from the old login-ID based flow (registerDriverAccount/loginDriverAccount
+  // below). Nothing currently writes a session without the fields above; these stay optional
+  // so old sessions/dead code don't break, but new code should not depend on them being present.
+  userId?: string;
+  driverId?: string;
+  loginId?: string;
+  fullName?: string;
+  phone?: string;
+  applicationStatus?: string;
 };
+
+/** Resolves the real, currently-authenticated Supabase user id — the actual source of truth
+ * for "who is this driver", independent of whatever shape the local session object has. */
+async function getAuthenticatedUserId(): Promise<string | null> {
+  const { data } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+  return data?.user?.id ?? null;
+}
 
 export type DriverDocumentDefinition = {
   id: string;
@@ -46,7 +56,11 @@ export const DRIVER_DOCUMENT_DEFINITIONS: DriverDocumentDefinition[] = [
   },
 ];
 
-export const DRIVER_SESSION_KEY = "logicmoov_driver_portal_session";
+// This is the ONE canonical driver-portal session key, shared with the login and register
+// pages (src/app/[locale]/driver/login/page.tsx and .../register/page.tsx write here too).
+// Do not introduce a second key for driver session state — that caused a real bug where
+// Documents & Compliance treated a logged-in driver as logged out (session-key mismatch).
+export const DRIVER_SESSION_KEY = "taxi_logicmoov_driver_session";
 
 export const DRIVER_LOGIN_ID_SCHEMA_ERROR =
   "The driver login_id column is missing from the existing database schema. Apply the migration in the current Supabase project before using driver registration/login.";
@@ -117,14 +131,60 @@ export async function getLoggedInDriverProfile() {
   const session = getDriverPortalSession();
   if (!session) return null;
 
+  const userId = session.userId || (await getAuthenticatedUserId());
+  if (!userId) return null;
+
   const { data, error } = await supabase
     .from("drivers")
     .select("*")
-    .eq("user_id", session.userId)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error || !data) return null;
   return data as Record<string, unknown>;
+}
+
+export async function updateDriverProfile(fields: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}): Promise<{ ok: boolean; message: string }> {
+  const session = getDriverPortalSession();
+  if (!session) {
+    return { ok: false, message: "You must be logged in to update your profile." };
+  }
+
+  const userId = session.userId || (await getAuthenticatedUserId());
+  if (!userId) {
+    return { ok: false, message: "You must be logged in to update your profile." };
+  }
+
+  const { error } = await supabase
+    .from("drivers")
+    .update({
+      first_name: fields.firstName.trim(),
+      last_name: fields.lastName.trim(),
+      email: fields.email.trim(),
+      phone: fields.phone.trim(),
+    })
+    .eq("user_id", userId);
+
+  if (error) {
+    return { ok: false, message: error.message || "Unable to save your profile details." };
+  }
+
+  // Keep the local session in sync so the sidebar/name shown elsewhere doesn't go stale.
+  setDriverPortalSession({
+    ...session,
+    firstName: fields.firstName.trim(),
+    lastName: fields.lastName.trim(),
+    fullName: `${fields.firstName.trim()} ${fields.lastName.trim()}`.trim(),
+    phone: fields.phone.trim(),
+    email: fields.email.trim(),
+  });
+
+  return { ok: true, message: "Profile saved." };
 }
 
 export async function registerDriverAccount(input: {
@@ -256,14 +316,25 @@ export async function loginDriverAccount(loginId: string, password: string): Pro
   return session;
 }
 
-export async function logoutDriverAccount(): Promise<void> {
+export async function logoutDriverAccount(): Promise<{ ok: boolean; message?: string }> {
   const hadSession = Boolean(getDriverPortalSession());
+  let remoteError: string | undefined;
 
   if (hadSession && supabase) {
-    await supabase.auth.signOut().catch(() => undefined);
+    const { error } = await supabase.auth.signOut().then(
+      (result) => result,
+      (err) => ({ error: err instanceof Error ? err : new Error("Sign out failed.") }),
+    );
+    if (error) {
+      remoteError = error.message || "Unable to reach the server to sign out.";
+    }
   }
 
+  // Always clear the local session, even if the remote sign-out call failed — the driver
+  // must not be left stuck "logged in" locally when they explicitly asked to log out.
   clearDriverPortalSession();
+
+  return remoteError ? { ok: false, message: remoteError } : { ok: true };
 }
 
 export function getDriverDisplayStatus(applicationStatus?: string): string {
@@ -301,8 +372,10 @@ export function normalizeDocumentStatus(status?: string | null): string {
 export async function getDriverVehicle() {
   const session = getDriverPortalSession();
   if (!session) return null;
+  const userId = session.userId || (await getAuthenticatedUserId());
+  if (!userId) return null;
 
-  const { data: driver } = await supabase.from("drivers").select("id").eq("user_id", session.userId).maybeSingle();
+  const { data: driver } = await supabase.from("drivers").select("id").eq("user_id", userId).maybeSingle();
   if (!driver) return null;
 
   const { data: vehicle } = await supabase.from("vehicles").select("*").eq("driver_id", driver.id).maybeSingle();
@@ -312,8 +385,10 @@ export async function getDriverVehicle() {
 export async function saveDriverVehicle(payload: Record<string, unknown>) {
   const session = getDriverPortalSession();
   if (!session) throw new Error("You must be logged in to save your vehicle details.");
+  const userId = session.userId || (await getAuthenticatedUserId());
+  if (!userId) throw new Error("You must be logged in to save your vehicle details.");
 
-  const { data: driver } = await supabase.from("drivers").select("id").eq("user_id", session.userId).maybeSingle();
+  const { data: driver } = await supabase.from("drivers").select("id").eq("user_id", userId).maybeSingle();
   if (!driver) throw new Error("Driver profile not found.");
 
   const vehicleData = { ...payload, driver_id: driver.id };
@@ -333,8 +408,10 @@ export async function saveDriverVehicle(payload: Record<string, unknown>) {
 export async function getDriverDocuments() {
   const session = getDriverPortalSession();
   if (!session) return [] as Record<string, unknown>[];
+  const userId = session.userId || (await getAuthenticatedUserId());
+  if (!userId) return [] as Record<string, unknown>[];
 
-  const { data: driver } = await supabase.from("drivers").select("id").eq("user_id", session.userId).maybeSingle();
+  const { data: driver } = await supabase.from("drivers").select("id").eq("user_id", userId).maybeSingle();
   if (!driver) return [] as Record<string, unknown>[];
 
   const { data, error } = await supabase.from("driver_documents").select("*").eq("driver_id", driver.id);
@@ -358,7 +435,10 @@ export async function upsertDriverDocument(type: string, file: File) {
     throw new Error("The selected file is larger than 10 MB. Please choose a smaller document.");
   }
 
-  const { data: driver } = await supabase.from("drivers").select("id").eq("user_id", session.userId).maybeSingle();
+  const userId = session.userId || (await getAuthenticatedUserId());
+  if (!userId) throw new Error("You must be logged in to upload a document.");
+
+  const { data: driver } = await supabase.from("drivers").select("id").eq("user_id", userId).maybeSingle();
   if (!driver) throw new Error("Driver profile not found.");
 
   const definition = DRIVER_DOCUMENT_DEFINITIONS.find((item) => item.id === type);
@@ -418,11 +498,13 @@ export async function getSignedDocumentUrl(path: string) {
 export async function getDriverProfileSummary() {
   const session = getDriverPortalSession();
   if (!session) return null;
+  const userId = session.userId || (await getAuthenticatedUserId());
+  if (!userId) return null;
 
   const { data: driver } = await supabase
     .from("drivers")
     .select("*")
-    .eq("user_id", session.userId)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (!driver) return null;

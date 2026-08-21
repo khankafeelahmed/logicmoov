@@ -7,10 +7,14 @@ import {
   DRIVER_DOCUMENT_DEFINITIONS,
   getDriverPortalSession,
   getDriverDocuments,
+  getLoggedInDriverProfile,
   getSignedDocumentUrl,
   normalizeDocumentStatus,
+  updateDriverProfile,
   upsertDriverDocument,
 } from "@/lib/driverPortal";
+
+type ProfileForm = { firstName: string; lastName: string; email: string; phone: string };
 
 export default function DriverDocumentsPage() {
   const { locale } = useParams<{ locale: string }>();
@@ -21,9 +25,35 @@ export default function DriverDocumentsPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewMimeType, setPreviewMimeType] = useState<string>("image/jpeg");
 
+  const [profileForm, setProfileForm] = useState<ProfileForm>({ firstName: "", lastName: "", email: "", phone: "" });
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileNotice, setProfileNotice] = useState<string | null>(null);
+
   const documentLookup = useMemo(() => {
     return Object.fromEntries(documents.map((document) => [String(document.document_type), document]));
   }, [documents]);
+
+  const loadDocuments = async () => {
+    const rows = await getDriverDocuments();
+    setDocuments(rows);
+  };
+
+  const loadProfile = async () => {
+    setProfileLoading(true);
+    try {
+      const profile = await getLoggedInDriverProfile();
+      setProfileForm({
+        firstName: typeof profile?.first_name === "string" ? profile.first_name : "",
+        lastName: typeof profile?.last_name === "string" ? profile.last_name : "",
+        email: typeof profile?.email === "string" ? profile.email : "",
+        phone: typeof profile?.phone === "string" && profile.phone !== "N/A" ? profile.phone : "",
+      });
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!getDriverPortalSession()) {
@@ -31,12 +61,37 @@ export default function DriverDocumentsPage() {
       return;
     }
 
-    void loadDocuments();
+    const timeoutId = window.setTimeout(() => {
+      void loadDocuments();
+      void loadProfile();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [locale, router]);
 
-  const loadDocuments = async () => {
-    const rows = await getDriverDocuments();
-    setDocuments(rows);
+  const handleProfileSave = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setProfileError(null);
+    setProfileNotice(null);
+
+    if (!profileForm.firstName.trim() || !profileForm.lastName.trim() || !profileForm.email.trim() || !profileForm.phone.trim()) {
+      setProfileError("Please fill in all profile fields.");
+      return;
+    }
+
+    setProfileSaving(true);
+    try {
+      const result = await updateDriverProfile(profileForm);
+      if (!result.ok) {
+        setProfileError(result.message);
+        return;
+      }
+      setProfileNotice("Profile saved.");
+    } catch (saveError) {
+      setProfileError(saveError instanceof Error ? saveError.message : "Unable to save your profile details.");
+    } finally {
+      setProfileSaving(false);
+    }
   };
 
   const handleUpload = async (definitionId: string, file?: File | null) => {
@@ -111,6 +166,70 @@ export default function DriverDocumentsPage() {
             </div>
           </div>
         )}
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-xl font-bold text-slate-900">Your details</h2>
+          <p className="mt-1 text-sm text-slate-600">Keep your contact details up to date.</p>
+
+          {profileError && <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{profileError}</div>}
+          {profileNotice && <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{profileNotice}</div>}
+
+          <form onSubmit={handleProfileSave} className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-semibold text-slate-700">First Name</span>
+              <input
+                type="text"
+                value={profileForm.firstName}
+                onChange={(event) => setProfileForm({ ...profileForm, firstName: event.target.value })}
+                disabled={profileLoading}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#dfeafc] disabled:opacity-60"
+                required
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-semibold text-slate-700">Last Name</span>
+              <input
+                type="text"
+                value={profileForm.lastName}
+                onChange={(event) => setProfileForm({ ...profileForm, lastName: event.target.value })}
+                disabled={profileLoading}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#dfeafc] disabled:opacity-60"
+                required
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-semibold text-slate-700">Email</span>
+              <input
+                type="email"
+                value={profileForm.email}
+                onChange={(event) => setProfileForm({ ...profileForm, email: event.target.value })}
+                disabled={profileLoading}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#dfeafc] disabled:opacity-60"
+                required
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-semibold text-slate-700">Phone Number</span>
+              <input
+                type="tel"
+                value={profileForm.phone}
+                onChange={(event) => setProfileForm({ ...profileForm, phone: event.target.value })}
+                disabled={profileLoading}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#dfeafc] disabled:opacity-60"
+                required
+              />
+            </label>
+            <div className="sm:col-span-2">
+              <button
+                type="submit"
+                disabled={profileLoading || profileSaving}
+                className="rounded-xl bg-[#111827] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#1f2937] disabled:opacity-60"
+              >
+                {profileSaving ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </form>
+        </div>
+
         {error && <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
         {notice && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</div>}
 

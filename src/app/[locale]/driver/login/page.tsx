@@ -5,9 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
 import { hasSupabaseConfig, supabase } from "@/lib/supabaseClient";
+import { setDriverPortalSession } from "@/lib/driverPortal";
 import { getCurrentDriverApplication } from "@/lib/driverOnboarding";
-
-const SESSION_KEY = "taxi_logicmoov_driver_session";
 
 export default function DriverLoginPage() {
   const { locale } = useParams<{ locale: string }>();
@@ -45,13 +44,10 @@ export default function DriverLoginPage() {
 
       const firstName = (data.user.user_metadata?.first_name as string | undefined) ?? "";
       const lastName = (data.user.user_metadata?.last_name as string | undefined) ?? "";
+      const nextSession = { email: loginEmail, firstName, lastName };
 
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(
-          SESSION_KEY,
-          JSON.stringify({ email: loginEmail, firstName, lastName }),
-        );
-      }
+      window.localStorage.setItem("taxi_logicmoov_driver_session", JSON.stringify(nextSession));
+      setDriverPortalSession(nextSession);
 
       // Check where the driver left off
       const app = getCurrentDriverApplication();

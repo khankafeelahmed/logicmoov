@@ -11,6 +11,7 @@ import {
   getCurrentDriverApplication,
   saveDriverApplication,
 } from "@/lib/driverOnboarding";
+import { clearDriverPortalSession, getDriverPortalSession, setDriverPortalSession, type DriverPortalSession } from "@/lib/driverPortal";
 import { hasSupabaseConfig, supabase } from "@/lib/supabaseClient";
 
 const CANADIAN_PROVINCES = [
@@ -18,23 +19,6 @@ const CANADIAN_PROVINCES = [
   "Newfoundland and Labrador","Northwest Territories","Nova Scotia",
   "Nunavut","Ontario","Prince Edward Island","Quebec","Saskatchewan","Yukon",
 ];
-
-const SESSION_KEY = "taxi_logicmoov_driver_session";
-
-type DriverSession = { email: string; firstName: string; lastName: string };
-
-function readSession(): DriverSession | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(SESSION_KEY);
-    return raw ? (JSON.parse(raw) as DriverSession) : null;
-  } catch { return null; }
-}
-
-function writeSession(session: DriverSession) {
-  if (typeof window !== "undefined")
-    window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-}
 
 async function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -52,14 +36,13 @@ type DocFiles = Record<ComplianceDocumentId, File | null>;
 export default function DriverRegisterPage() {
   const { locale } = useParams<{ locale: string }>();
 
-  const initialSession = readSession();
+  const initialSession = getDriverPortalSession();
   const initialStep: Step = (() => {
-    const existingSession = readSession();
+    const existingSession = getDriverPortalSession();
     if (!existingSession) return "account";
     const app = getCurrentDriverApplication();
     if (!app) {
-      if (typeof window !== "undefined") window.localStorage.removeItem(SESSION_KEY);
-      return "account";
+      return "personal";
     }
     if (app.status === "submitted" || app.status === "under_review" || app.status === "approved" || app.status === "pending_verification") {
       return "success";
@@ -70,7 +53,7 @@ export default function DriverRegisterPage() {
 
   const [step, setStep] = useState<Step>(initialStep);
   const [authMode, setAuthMode] = useState<"register" | "login">("register");
-  const [session, setSession] = useState<DriverSession | null>(initialSession);
+  const [session, setSession] = useState<DriverPortalSession | null>(initialSession);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -103,8 +86,9 @@ export default function DriverRegisterPage() {
         termsAccepted: true, privacyAccepted: true, agreementAccepted: true,
       });
       if (!result.ok) { setError(result.message); return; }
-      const newSession: DriverSession = { email: regForm.email, firstName: regForm.firstName, lastName: regForm.lastName };
-      writeSession(newSession); setSession(newSession); setStep("personal");
+      const newSession: DriverPortalSession = { email: regForm.email, firstName: regForm.firstName, lastName: regForm.lastName };
+      window.localStorage.setItem("taxi_logicmoov_driver_session", JSON.stringify(newSession));
+      setDriverPortalSession(newSession); setSession(newSession); setStep("personal");
     } catch (err) { setError(err instanceof Error ? err.message : "Registration failed."); }
     finally { setLoading(false); }
   };
@@ -128,8 +112,9 @@ export default function DriverRegisterPage() {
 
       const firstName = (data.user.user_metadata?.first_name as string | undefined) ?? "";
       const lastName = (data.user.user_metadata?.last_name as string | undefined) ?? "";
-      const newSession: DriverSession = { email: loginEmail, firstName, lastName };
-      writeSession(newSession); setSession(newSession);
+      const newSession: DriverPortalSession = { email: loginEmail, firstName, lastName };
+      window.localStorage.setItem("taxi_logicmoov_driver_session", JSON.stringify(newSession));
+      setDriverPortalSession(newSession); setSession(newSession);
 
       const app = getCurrentDriverApplication();
       if (app && (app.status === "submitted" || app.status === "under_review" || app.status === "approved" || app.status === "pending_verification")) {

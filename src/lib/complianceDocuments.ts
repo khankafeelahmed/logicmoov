@@ -114,7 +114,7 @@ async function syncToSupabase(record: ComplianceDocumentRecord) {
         const { error } = await supabase.storage.from(DRIVER_COMPLIANCE_BUCKET).upload(path, uploadFile, { contentType: mimeType, upsert: true });
         if (!error) {
           const signed = await supabase.storage.from(DRIVER_COMPLIANCE_BUCKET).createSignedUrl(path, 60 * 60 * 24 * 7);
-          fileUrl = signed.data?.signedUrl || signed.data?.publicUrl || fileUrl;
+          fileUrl = signed.data?.signedUrl || fileUrl;
         }
       }
     }
