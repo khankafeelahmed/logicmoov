@@ -50,52 +50,35 @@ export default function AdminDriversPage() {
       return;
     }
 
-    const { data, error: documentsError } = await supabase
-      .from("driver_documents")
-      .select("id, driver_id, document_type, file_path, original_filename, status, mime_type")
-      .in("driver_id", ids);
-
-    if (documentsError || !Array.isArray(data)) {
+    const token = getToken();
+    if (!token) {
       setDriverDocuments({});
       return;
     }
 
-    const docsByDriver: Record<string, DriverDocumentRecord[]> = {};
+    try {
+      const { documents } = await api.listDriverDocuments(token, ids);
+      const docsByDriver: Record<string, DriverDocumentRecord[]> = {};
 
-    for (const item of data) {
-      const driverId = String(item.driver_id);
-      const path = typeof item.file_path === "string" ? item.file_path : "";
-      const name = typeof item.original_filename === "string" ? item.original_filename : "Document";
-      const docType = String(item.document_type ?? "document");
+      for (const [driverId, items] of Object.entries(documents ?? {})) {
+        docsByDriver[driverId] = Array.isArray(items)
+          ? items.map((item) => ({
+              id: String(item.id ?? ""),
+              driverId: String(item.driverId ?? driverId),
+              documentType: String(item.documentType ?? "document"),
+              fileName: String(item.fileName ?? "Document"),
+              filePath: String(item.filePath ?? ""),
+              status: String(item.status ?? "pending"),
+              mimeType: typeof item.mimeType === "string" ? item.mimeType : null,
+              url: typeof item.url === "string" ? item.url : "",
+            }))
+          : [];
+      }
 
-      const signedUrl = path
-        ? await (async () => {
-            try {
-              const { data: signedData } = await supabase.storage
-                .from("driver-documents")
-                .createSignedUrl(path, 60 * 60 * 24 * 7);
-              return signedData?.signedUrl ?? "";
-            } catch {
-              return "";
-            }
-          })()
-        : "";
-
-      const row: DriverDocumentRecord = {
-        id: String(item.id),
-        driverId,
-        documentType: docType,
-        fileName: name,
-        filePath: path,
-        status: String(item.status ?? "pending"),
-        mimeType: typeof item.mime_type === "string" ? item.mime_type : null,
-        url: signedUrl,
-      };
-
-      docsByDriver[driverId] = [...(docsByDriver[driverId] ?? []), row];
+      setDriverDocuments(docsByDriver);
+    } catch {
+      setDriverDocuments({});
     }
-
-    setDriverDocuments(docsByDriver);
   }, []);
 
   const load = useCallback(async () => {

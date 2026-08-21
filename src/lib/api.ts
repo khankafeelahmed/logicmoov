@@ -322,20 +322,46 @@ export const api = {
     });
   },
 
-  async listDrivers(token: string) {
-    const res = await fetch('/api/admin/list-drivers', {
+  async listDriverDocuments(token: string, driverIds: string[]) {
+    const res = await fetch("/api/admin/list-documents", {
+      method: "POST",
       headers: {
-        Accept: 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
+      body: JSON.stringify({ driverIds }),
     });
 
-    const isJson = res.headers.get('content-type')?.includes('application/json');
+    const isJson = res.headers.get("content-type")?.includes("application/json");
     const data = isJson ? await res.json() : null;
 
     if (!res.ok) {
       const message =
-        (data && typeof data.error === 'string' && data.error) ||
+        (data && typeof data.error === "string" && data.error) ||
+        `Request failed (${res.status})`;
+      throw new ApiError(res.status, message);
+    }
+
+    return (data ?? { documents: {} }) as {
+      documents: Record<string, Array<Record<string, unknown>>>;
+    };
+  },
+
+  async listDrivers(token: string) {
+    const res = await fetch("/api/admin/list-drivers", {
+      headers: {
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    const isJson = res.headers.get("content-type")?.includes("application/json");
+    const data = isJson ? await res.json() : null;
+
+    if (!res.ok) {
+      const message =
+        (data && typeof data.error === "string" && data.error) ||
         `Request failed (${res.status})`;
       throw new ApiError(res.status, message);
     }

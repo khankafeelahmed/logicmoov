@@ -330,9 +330,13 @@ export async function logoutDriverAccount(): Promise<{ ok: boolean; message?: st
     }
   }
 
-  // Always clear the local session, even if the remote sign-out call failed — the driver
-  // must not be left stuck "logged in" locally when they explicitly asked to log out.
+  // Always clear the local session and any stale application draft, even if the remote
+  // sign-out call failed. The browser must not keep identity or draft state from a previous
+  // driver account alive across the next login.
   clearDriverPortalSession();
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem("taxi_logicmoov_driver_application");
+  }
 
   return remoteError ? { ok: false, message: remoteError } : { ok: true };
 }

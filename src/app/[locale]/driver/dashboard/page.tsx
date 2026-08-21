@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import DriverPortalLayout from "@/components/driver/DriverPortalLayout";
 import { getDriverEligibilityStatus } from "@/lib/complianceDocuments";
 import { buildDriverStatusSummary, getCurrentDriverApplication, type DriverApplicationDraft } from "@/lib/driverOnboarding";
+import { supabase } from "@/lib/supabaseClient";
 
 const statusLabels = ["Draft", "Submitted", "Under Review", "Needs Information", "Approved", "Rejected", "Suspended"];
 const dashboardCards = [
@@ -22,6 +23,7 @@ export default function DriverDashboardPage() {
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
   const [draft, setDraft] = useState<DriverApplicationDraft | null>(null);
+  const [authUser, setAuthUser] = useState<{ email?: string | null; user_metadata?: { first_name?: string; last_name?: string } } | null>(null);
 
   useEffect(() => {
     // getCurrentDriverApplication() reads localStorage, which differs between the server-rendered
@@ -29,14 +31,21 @@ export default function DriverDashboardPage() {
     // still not calling setState synchronously within the effect body itself.
     const timeoutId = window.setTimeout(() => {
       setDraft(getCurrentDriverApplication());
+      if (supabase) {
+        supabase.auth.getUser().then(({ data }) => {
+          setAuthUser(data.user ?? null);
+        }).catch(() => setAuthUser(null));
+      }
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
   }, []);
 
   const summary = buildDriverStatusSummary(draft);
-  const complianceSummary = useMemo(() => getDriverEligibilityStatus(draft?.email ?? ""), [draft?.email]);
-  const firstName = draft?.firstName || "Driver";
+  const complianceSummary = useMemo(() => getDriverEligibilityStatus(draft?.email ?? authUser?.email ?? ""), [draft?.email, authUser?.email]);
+  const firstName = String(authUser?.user_metadata?.first_name || draft?.firstName || "Driver").trim() || "Driver";
+  const lastName = String(authUser?.user_metadata?.last_name || draft?.lastName || "").trim();
+  const email = String(authUser?.email || draft?.personal?.email || draft?.account?.email || draft?.email || "").trim();
 
   if (!draft) {
     return (
@@ -90,9 +99,9 @@ export default function DriverDashboardPage() {
         <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
           <h3 className="text-lg font-bold text-slate-800">Driver Profile</h3>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <ProfileField label="First Name" value={draft?.firstName} />
-            <ProfileField label="Last Name" value={draft?.lastName} />
-            <ProfileField label="Email" value={draft?.personal?.email || draft?.account?.email || draft?.email} />
+            <ProfileField label="First Name" value={firstName} />
+            <ProfileField label="Last Name" value={lastName || "Not provided"} />
+            <ProfileField label="Email" value={email || "Not provided"} />
             <ProfileField label="Phone Number" value={draft?.account?.mobilePhone || draft?.personal?.mobilePhone} />
           </div>
         </div>
